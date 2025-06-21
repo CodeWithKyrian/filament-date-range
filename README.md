@@ -230,6 +230,24 @@ DateRangePicker::make('date_range')
 ```
 ![Calendar popover showing only one month.](art/form-field-single-calendar.png)
 
+#### `inline(bool | Closure $condition = true)`
+
+Controls whether the start and end inputs are displayed inline (horizontally) or stacked (vertically). Defaults to `true` (inline layout).
+```php
+DateRangePicker::make('event_period')
+    ->inline() // Display inputs side by side (default)
+```
+![Date range picker with inputs displayed horizontally side by side.](art/form-field-inline.png)
+
+#### `stacked(bool | Closure $condition = true)`
+
+A convenience method to set the layout to stacked (vertical). Equivalent to `->inline(false)`.
+```php
+DateRangePicker::make('event_period')
+    ->stacked() // Display inputs vertically stacked
+```
+![Date range picker with inputs displayed vertically stacked.](art/form-field-stacked.png)
+
 #### `readOnly(bool | Closure $condition = true)`
 
 Makes the input fields read-only, preventing direct text input (selection via calendar is still possible).
@@ -309,6 +327,8 @@ The `DateRangeFilter` mirrors many of the customization methods available on the
 -   `endPlaceholder(string | Closure | null $placeholder)`
 -   `autoClose(bool | Closure $condition = true)`: For filters, defaulting to `true` often provides a smoother UX, as the filter applies once the range is set and the popover closes.
 -   `dualCalendar(bool | Closure $condition = true)`
+-   `inline(bool | Closure $condition = true)`: Controls whether the start and end inputs are displayed horizontally (default) or vertically
+-   `stacked(bool | Closure $condition = true)`: Convenience method to set vertical layout, equivalent to `->inline(false)`
 
 Example:
 ```php

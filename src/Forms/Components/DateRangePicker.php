@@ -46,6 +46,8 @@ class DateRangePicker extends Field
 
     protected bool | Closure $dualCalendar = true;
 
+    protected bool | Closure $isInline = true;
+
     public static string $defaultFormat = 'Y-m-d';
 
     public static string $defaultDisplayFormat = 'M j, Y';
@@ -53,6 +55,8 @@ class DateRangePicker extends Field
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->inline(true);
 
         $this->default([
             'start' => null,
@@ -215,6 +219,18 @@ class DateRangePicker extends Field
         return $this;
     }
 
+    public function inline(bool | Closure $condition = true): static
+    {
+        $this->isInline = $condition;
+        return $this;
+    }
+
+    public function stacked(bool | Closure $condition = true): static
+    {
+        $this->isInline = ! $condition;
+        return $this;
+    }
+
     public function getFormat(): string
     {
         return $this->evaluate($this->format) ?? static::$defaultFormat;
@@ -311,5 +327,10 @@ class DateRangePicker extends Field
     public function shouldDisplayDualCalendar(): bool
     {
         return $this->evaluate($this->dualCalendar);
+    }
+
+    public function isInline(): bool
+    {
+        return $this->evaluate($this->isInline);
     }
 }

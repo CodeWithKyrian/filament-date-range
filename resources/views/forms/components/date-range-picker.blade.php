@@ -7,6 +7,7 @@
     $statePath = $getStatePath();
 
     $separator = $getSeparator();
+    $isInline = $isInline();
 
     $isRtl = in_array($getLocale(), ['ar', 'fa', 'he', 'ur']);
     $prevMonthIcon = $isRtl ? 'heroicon-o-chevron-right' : 'heroicon-o-chevron-left';
@@ -31,9 +32,13 @@
         x-on:keydown.esc="if(isOpen()) cancelSelectionAndClose()"
         {{ $attributes->merge($getExtraAlpineAttributes(), escape: false)->class(['fi-fo-date-range-picker']) }}>
 
-        <div x-ref="inputContainer" class="flex items-center gap-x-3">
+        <div x-ref="inputContainer" @class([
+            'flex',
+            'items-center gap-3' => $isInline,
+            'flex-col gap-2' => !$isInline,
+        ])>
             {{-- Start --}}
-            <div class="flex-1 min-w-0">
+            <div @class(['min-w-0', 'flex-1' => $isInline, 'w-full' => !$isInline])>
                 <x-filament::input.wrapper :disabled="$isDisabled()" :inline-prefix="$isStartPrefixInline()" :inline-suffix="$isStartSuffixInline()" :prefix="$getStartPrefixLabel()"
                     :prefix-actions="$getStartPrefixActions()" :prefix-icon="$getStartPrefixIcon()" :prefix-icon-color="$getStartPrefixIconColor()" :suffix="$getStartSuffixLabel()" :suffix-actions="$getStartSuffixActions()"
                     :suffix-icon="$getStartSuffixIcon()" :suffix-icon-color="$getStartSuffixIconColor()" :valid="!$errors->has($statePath . '.start')"
@@ -54,7 +59,11 @@
             </div>
 
             {{-- Separator --}}
-            <div class="text-sm text-gray-500 fi-date-range-separator shrink-0 dark:text-gray-400">
+            <div @class([
+                'inline-flex text-sm text-gray-500 dark:text-gray-400 fi-date-range-separator',
+                'shrink-0' => $isInline,
+                'justify-center' => !$isInline,
+            ])>
                 @if ($separator instanceof \Illuminate\Contracts\Support\Htmlable)
                     {!! $separator !!}
                 @else
@@ -63,7 +72,7 @@
             </div>
 
             {{-- End --}}
-            <div class="flex-1 min-w-0">
+            <div @class(['min-w-0', 'flex-1' => $isInline, 'w-full' => !$isInline])>
                 <x-filament::input.wrapper :disabled="$isDisabled()" :inline-prefix="$isEndPrefixInline()" :inline-suffix="$isEndSuffixInline()" :prefix="$getEndPrefixLabel()"
                     :prefix-actions="$getEndPrefixActions()" :prefix-icon="$getEndPrefixIcon()" :prefix-icon-color="$getEndPrefixIconColor()" :suffix="$getEndSuffixLabel()" :suffix-actions="$getEndSuffixActions()"
                     :suffix-icon="$getEndSuffixIcon()" :suffix-icon-color="$getEndSuffixIconColor()" :valid="!$errors->has($statePath . '.end')"
@@ -87,13 +96,13 @@
         {{-- Calendar Popover --}}
         <div x-ref="panel" x-cloak x-float.placement.bottom-start.offset.flip.shift="{ offset: 8 }" wire:ignore
             wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.panel"
-            class="absolute z-10 p-4 bg-white rounded-lg shadow-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+            class="absolute z-10 p-4 bg-white rounded-lg ring-1 shadow-lg ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
             :style="dualCalendar ? 'min-width: 24rem;' : 'min-width: 14rem;'">
 
             <div class="grid gap-y-3">
 
                 {{-- Header: Month/Year and Nav --}}
-                <div class="relative flex items-center justify-between px-1 mb-2">
+                <div class="flex relative justify-between items-center px-1 mb-2">
                     <button type="button"
                         title="{{ __('filament-forms::components.date_time_picker.buttons.previous_month.label') }}"
                         x-on:click.prevent="previousMonth()" x-bind:disabled="isDisabled || isPreviousMonthDisabled()"
@@ -104,7 +113,7 @@
                     </button>
 
                     {{-- Month/Year Display Area --}}
-                    <div class="flex items-center justify-around flex-grow">
+                    <div class="flex flex-grow justify-around items-center">
                         {{-- Calendar 1 Header (Month/Year) --}}
                         <div
                             class="flex items-center space-x-1 rtl:space-x-reverse {{ $shouldDisplayDualCalendar() ? 'w-1/2' : 'w-full' }} justify-center">
@@ -116,7 +125,7 @@
 
                         {{-- Calendar 2 Header (Month/Year) --}}
                         <template x-if="dualCalendar">
-                            <div class="flex items-center justify-center w-1/2 space-x-1 rtl:space-x-reverse">
+                            <div class="flex justify-center items-center space-x-1 w-1/2 rtl:space-x-reverse">
                                 <span x-text="monthNames[currentCalendarMonth2]"
                                     class="text-sm font-semibold text-gray-950 dark:text-white"></span>
                                 <span x-text="currentCalendarYear2"
@@ -262,16 +271,16 @@
                 {{-- Apply/Cancel buttons --}}
                 <template x-if="!autoClose">
                     <div
-                        class="flex items-center justify-end pt-4 mt-2 space-x-2 border-t border-gray-200 dark:border-gray-700 rtl:space-x-reverse">
+                        class="flex justify-end items-center pt-4 mt-2 space-x-2 border-t border-gray-200 dark:border-gray-700 rtl:space-x-reverse">
                         {{-- Cancel Button --}}
                         <button type="button" x-on:click="cancelSelectionAndClose()"
-                            class="inline-flex items-center justify-center text-xs font-medium text-gray-700 outline-none fi-link hover:underline focus:underline dark:text-gray-200 fi-btn-color-gray">
+                            class="inline-flex justify-center items-center text-xs font-medium text-gray-700 outline-none fi-link hover:underline focus:underline dark:text-gray-200 fi-btn-color-gray">
                             {{ __('filament-date-range::picker.buttons.cancel') }}
                         </button>
 
                         {{-- Apply Button --}}
                         <button type="button" x-on:click="applySelectionAndClose()"
-                            class="inline-flex items-center justify-center text-xs font-medium outline-none fi-link text-primary-600 hover:underline focus:underline dark:text-primary-500 fi-btn-color-primary">
+                            class="inline-flex justify-center items-center text-xs font-medium outline-none fi-link text-primary-600 hover:underline focus:underline dark:text-primary-500 fi-btn-color-primary">
                             {{ __('filament-date-range::picker.buttons.apply') }}
                         </button>
                     </div>

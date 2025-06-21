@@ -33,6 +33,8 @@ class DateRangeFilter extends BaseFilter
 
     protected bool | Closure $dualCalendar = true;
 
+    protected bool | Closure $isInline = true;
+
     protected string | null $startColumn = null;
 
     protected string | null $endColumn = null;
@@ -90,6 +92,7 @@ class DateRangeFilter extends BaseFilter
                 ->endPlaceholder($this->getEndPlaceholder())
                 ->autoClose($this->shouldAutoClose())
                 ->dualCalendar($this->shouldDisplayDualCalendar())
+                ->inline($this->isInline())
         ]);
     }
 
@@ -202,6 +205,18 @@ class DateRangeFilter extends BaseFilter
         return $this;
     }
 
+    public function inline(bool | Closure $condition = true): static
+    {
+        $this->isInline = $condition;
+        return $this;
+    }
+
+    public function stacked(bool | Closure $condition = true): static
+    {
+        $this->isInline = ! $condition;
+        return $this;
+    }
+
     public function hiddenLabel(bool | Closure $condition = true): static
     {
         $this->isLabelHidden = $condition;
@@ -271,5 +286,10 @@ class DateRangeFilter extends BaseFilter
     public function isLabelHidden(): bool
     {
         return $this->evaluate($this->isLabelHidden);
+    }
+
+    public function isInline(): bool
+    {
+        return $this->evaluate($this->isInline);
     }
 }
