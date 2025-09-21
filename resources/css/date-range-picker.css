@@ -1,5 +1,7 @@
+@import "tailwindcss";
+
 .fi-daterange-input-container {
-    @apply relative flex-grow;
+    @apply relative grow;
 }
 
 .fi-daterange-clear-btn {
@@ -27,7 +29,7 @@
 }
 
 .drp-day-adjacent-month {
-    @apply opacity-50 cursor-default text-gray-400 dark:text-gray-600;
+    @apply cursor-default text-gray-400/50 dark:text-gray-600/50;
     /* Or just use opacity-50 cursor-default if base text color is fine */
 }
 

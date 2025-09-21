@@ -36,7 +36,7 @@ class DateRangePicker extends Field
 
     protected int | Closure $firstDayOfWeek = 0;
 
-    protected string | Htmlable | Closure $separator = 'to';
+    protected string | Closure | null $separator = 'to';
 
     protected string | Closure | null $startPlaceholder = null;
 
@@ -180,7 +180,7 @@ class DateRangePicker extends Field
         return $this;
     }
 
-    public function separator(string | Htmlable | Closure $separator): static
+    public function separator(string | Closure | null $separator = 'to'): static
     {
         $this->separator = $separator;
         return $this;
@@ -304,7 +304,7 @@ class DateRangePicker extends Field
         return $this->evaluate($this->firstDayOfWeek);
     }
 
-    public function getSeparator(): string | Htmlable
+    public function getSeparator(): string | null
     {
         return $this->evaluate($this->separator);
     }
