@@ -79,7 +79,7 @@ class DateRangeFilter extends BaseFilter
             return "{$label}: {$start} - {$end}";
         });
 
-        $this->form([
+        $this->schema([
             DateRangePicker::make($this->getName())
                 ->label($this->getLabel())
                 ->hiddenLabel($this->isLabelHidden())
