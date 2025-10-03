@@ -345,25 +345,26 @@ class DateRangePicker extends Field
     public function getEnabledDates(): ?array
     {
         $enabledDates = $this->evaluate($this->enabledDates);
-        
+
         if ($enabledDates === null) {
             return null;
         }
+
+        $formattedDates = [];
         
-        return array_map(function ($date) {
+        foreach ($enabledDates as $date) {
             if ($date instanceof CarbonInterface) {
-                return $date->format('Y-m-d');
+                $formattedDates[] = $date->format('Y-m-d');
+                continue;
             }
-            
+
             if (is_string($date)) {
                 try {
-                    return Carbon::parse($date)->format('Y-m-d');
-                } catch (\Exception $e) {
-                    return null;
-                }
+                    $formattedDates[] = Carbon::parse($date)->format('Y-m-d');
+                } catch (\Exception $e) {}
             }
-            
-            return null;
-        }, $enabledDates);
+        }
+
+        return empty($formattedDates) ? null : $formattedDates;
     }
 }
