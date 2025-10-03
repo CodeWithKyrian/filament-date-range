@@ -165,6 +165,8 @@ DateRangePicker::make('available_dates')
     ])
 ```
 
+![Date range picker with specific enabled dates showing only selectable dates highlighted](art/form-field-enabled-dates.png)
+
 #### `locale(string | Closure | null $locale)`
 
 Sets the locale for the calendar (month names, day names) and potentially for parsing/displaying dates if the format string is locale-aware. Defaults to your application's current locale.
