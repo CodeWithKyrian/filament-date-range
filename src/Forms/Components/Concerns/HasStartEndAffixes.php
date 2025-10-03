@@ -3,10 +3,10 @@
 namespace CodeWithKyrian\FilamentDateRange\Forms\Components\Concerns;
 
 use Closure;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Support\Enums\ActionSize;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
+use Filament\Actions\Action;
+use Filament\Support\Enums\Size;
+use Illuminate\Contracts\Support\Htmlable;
 
 trait HasStartEndAffixes
 {
@@ -255,7 +255,7 @@ trait HasStartEndAffixes
         foreach ($this->startPrefixActions as $action) {
             foreach (Arr::wrap($this->evaluate($action)) as $evaluatedAction) {
                 $this->cachedStartPrefixActions[$evaluatedAction->getName()] = $this->prepareAction(
-                    $evaluatedAction->defaultSize(ActionSize::Small)->defaultView(Action::ICON_BUTTON_VIEW)
+                    $evaluatedAction->defaultSize(Size::Small)->defaultView(Action::ICON_BUTTON_VIEW)
                 );
             }
         }
@@ -275,7 +275,7 @@ trait HasStartEndAffixes
         foreach ($this->startSuffixActions as $action) {
             foreach (Arr::wrap($this->evaluate($action)) as $evaluatedAction) {
                 $this->cachedStartSuffixActions[$evaluatedAction->getName()] = $this->prepareAction(
-                    $evaluatedAction->defaultSize(ActionSize::Small)->defaultView(Action::ICON_BUTTON_VIEW)
+                    $evaluatedAction->defaultSize(Size::Small)->defaultView(Action::ICON_BUTTON_VIEW)
                 );
             }
         }
@@ -335,7 +335,7 @@ trait HasStartEndAffixes
         foreach ($this->endPrefixActions as $action) {
             foreach (Arr::wrap($this->evaluate($action)) as $evaluatedAction) {
                 $this->cachedEndPrefixActions[$evaluatedAction->getName()] = $this->prepareAction(
-                    $evaluatedAction->defaultSize(ActionSize::Small)->defaultView(Action::ICON_BUTTON_VIEW)
+                    $evaluatedAction->defaultSize(Size::Small)->defaultView(Action::ICON_BUTTON_VIEW)
                 );
             }
         }
@@ -355,7 +355,7 @@ trait HasStartEndAffixes
         foreach ($this->endSuffixActions as $action) {
             foreach (Arr::wrap($this->evaluate($action)) as $evaluatedAction) {
                 $this->cachedEndSuffixActions[$evaluatedAction->getName()] = $this->prepareAction(
-                    $evaluatedAction->defaultSize(ActionSize::Small)->defaultView(Action::ICON_BUTTON_VIEW)
+                    $evaluatedAction->defaultSize(Size::Small)->defaultView(Action::ICON_BUTTON_VIEW)
                 );
             }
         }
