@@ -26,6 +26,7 @@ export default function dateRangePickerFormComponent({
 	isReadOnly = false,
 	isDisabled = false,
 	dualCalendar = true,
+	enabledDates = null,
 }) {
 	const timezone = dayjs.tz.guess();
 
@@ -70,6 +71,7 @@ export default function dateRangePickerFormComponent({
 		isReadOnly,
 		isDisabled,
 		dualCalendar,
+		enabledDates,
 
 		init() {
 			dayjs.locale(locales[locale] ?? locales['en'])
@@ -345,24 +347,40 @@ export default function dateRangePickerFormComponent({
 					this.activeEnd = 'end';
 					shouldSwitchActiveEnd = false;
 				} else {
-					this.isAwaitingEndDate = false;
-					rangeCompleted = true;
+					// Check if the range is continuous before completing
+					if (this.isRangeContinuous(this.start, this.end)) {
+						this.isAwaitingEndDate = false;
+						rangeCompleted = true;
+					} else {
+						// Range is not continuous, reset end date
+						this.end = null;
+						this.isAwaitingEndDate = true;
+						this.activeEnd = 'end';
+						shouldSwitchActiveEnd = false;
+					}
 				}
 			} else { // activeEnd === 'end'
-				this.end = selectedDate;
-				if (this.start && this.end.isBefore(this.start, 'day')) {
-					this.start = this.end.clone();
+				const potentialEnd = selectedDate;
+				if (this.start && potentialEnd.isBefore(this.start, 'day')) {
+					this.start = potentialEnd.clone();
 					this.end = null;
 					this.isAwaitingEndDate = true;
 					this.activeEnd = 'end';
 					shouldSwitchActiveEnd = false;
 				} else if (!this.start) {
-					this.start = this.end.clone();
+					this.start = potentialEnd.clone();
 					this.isAwaitingEndDate = false;
 					rangeCompleted = true;
 				} else {
-					this.isAwaitingEndDate = false;
-					rangeCompleted = true;
+					// Check if the range is continuous before setting the end date
+					if (this.isRangeContinuous(this.start, potentialEnd)) {
+						this.end = potentialEnd;
+						this.isAwaitingEndDate = false;
+						rangeCompleted = true;
+					} else {
+						// Range is not continuous, don't set the end date
+						return;
+					}
 				}
 			}
 
@@ -388,7 +406,16 @@ export default function dateRangePickerFormComponent({
 				this.hoveredStartDate = hoverDate;
 				this.hoveredEndDate = null;
 			} else if (this.activeEnd === 'end' && this.start) {
-				this.hoveredEndDate = hoverDate.isBefore(this.start, 'day') ? null : hoverDate;
+				if (hoverDate.isBefore(this.start, 'day')) {
+					this.hoveredEndDate = null;
+				} else {
+					// Only show hover if the range would be continuous
+					if (this.isRangeContinuous(this.start, hoverDate)) {
+						this.hoveredEndDate = hoverDate;
+					} else {
+						this.hoveredEndDate = null;
+					}
+				}
 				this.hoveredStartDate = null; // Clear other preview
 			} else {
 				this.hoveredStartDate = null;
@@ -427,7 +454,33 @@ export default function dateRangePickerFormComponent({
 		isDayDisabledInternal(dateAsDayjs) {
 			if (this.minDate && dateAsDayjs.isBefore(this.minDate, "day")) return true;
 			if (this.maxDate && dateAsDayjs.isAfter(this.maxDate, "day")) return true;
+			
+			// If enabledDates is provided, only those dates are allowed
+			if (this.enabledDates && Array.isArray(this.enabledDates)) {
+				const dateString = dateAsDayjs.format('YYYY-MM-DD');
+				return !this.enabledDates.includes(dateString);
+			}
+			
 			return false;
+		},
+
+		isRangeContinuous(startDate, endDate) {
+			if (!this.enabledDates || !Array.isArray(this.enabledDates)) return true;
+			if (!startDate || !endDate) return true;
+			
+			const start = startDate.isBefore(endDate) ? startDate : endDate;
+			const end = startDate.isBefore(endDate) ? endDate : startDate;
+			
+			let current = start.clone();
+			while (current.isSameOrBefore(end, 'day')) {
+				const dateString = current.format('YYYY-MM-DD');
+				if (!this.enabledDates.includes(dateString)) {
+					return false;
+				}
+				current = current.add(1, 'day');
+			}
+			
+			return true;
 		},
 
 		isDayDisabled(day, month, year) {

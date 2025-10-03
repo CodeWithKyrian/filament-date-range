@@ -35,6 +35,8 @@ class DateRangeFilter extends BaseFilter
 
     protected bool | Closure $isInline = true;
 
+    protected array | Closure | null $enabledDates = null;
+
     protected string | null $startColumn = null;
 
     protected string | null $endColumn = null;
@@ -93,6 +95,7 @@ class DateRangeFilter extends BaseFilter
                 ->autoClose($this->shouldAutoClose())
                 ->dualCalendar($this->shouldDisplayDualCalendar())
                 ->inline($this->isInline())
+                ->enabledDates($this->getEnabledDates())
         ]);
     }
 
@@ -217,6 +220,12 @@ class DateRangeFilter extends BaseFilter
         return $this;
     }
 
+    public function enabledDates(array | Closure | null $dates): static
+    {
+        $this->enabledDates = $dates;
+        return $this;
+    }
+
     public function hiddenLabel(bool | Closure $condition = true): static
     {
         $this->isLabelHidden = $condition;
@@ -291,5 +300,30 @@ class DateRangeFilter extends BaseFilter
     public function isInline(): bool
     {
         return $this->evaluate($this->isInline);
+    }
+
+    public function getEnabledDates(): ?array
+    {
+        $enabledDates = $this->evaluate($this->enabledDates);
+        
+        if ($enabledDates === null) {
+            return null;
+        }
+        
+        return array_map(function ($date) {
+            if ($date instanceof CarbonInterface) {
+                return $date->format('Y-m-d');
+            }
+            
+            if (is_string($date)) {
+                try {
+                    return Carbon::parse($date)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    return null;
+                }
+            }
+            
+            return null;
+        }, $enabledDates);
     }
 }

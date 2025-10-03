@@ -152,6 +152,19 @@ DateRangePicker::make('past_event')
 ```
 ![Calendar popover showing future dates and today disabled.](art/form-field-maxdate.png)
 
+#### `enabledDates(array | Closure | null $dates)`
+
+Sets specific enabled dates. When provided, only the dates in this array will be selectable; all other dates will be disabled. Accepts an array of dates (as Carbon instances or strings) or a closure that returns such an array.
+```php
+DateRangePicker::make('available_dates')
+    ->enabledDates([
+        '2024-01-15',
+        '2024-01-16', 
+        '2024-01-20',
+        now()->addDays(5),
+    ])
+```
+
 #### `locale(string | Closure | null $locale)`
 
 Sets the locale for the calendar (month names, day names) and potentially for parsing/displaying dates if the format string is locale-aware. Defaults to your application's current locale.
@@ -320,6 +333,7 @@ The `DateRangeFilter` mirrors many of the customization methods available on the
 -   `format(string | Closure | null $format)` (Note: The filter state uses `Y-m-d` by default for its internal `start` and `end` values)
 -   `minDate(CarbonInterface | string | Closure | null $date)`
 -   `maxDate(CarbonInterface | string | Closure | null $date)`
+-   `enabledDates(array | Closure | null $dates)`: Sets specific enabled dates; all other dates will be disabled
 -   `timezone(string | Closure | null $timezone)`
 -   `locale(string | Closure | null $locale)`
 -   `firstDayOfWeek(int | Closure $day)`

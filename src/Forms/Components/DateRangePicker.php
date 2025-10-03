@@ -48,6 +48,8 @@ class DateRangePicker extends Field
 
     protected bool | Closure $isInline = true;
 
+    protected array | Closure | null $enabledDates = null;
+
     public static string $defaultFormat = 'Y-m-d';
 
     public static string $defaultDisplayFormat = 'M j, Y';
@@ -231,6 +233,12 @@ class DateRangePicker extends Field
         return $this;
     }
 
+    public function enabledDates(array | Closure | null $dates): static
+    {
+        $this->enabledDates = $dates;
+        return $this;
+    }
+
     public function getFormat(): string
     {
         return $this->evaluate($this->format) ?? static::$defaultFormat;
@@ -332,5 +340,30 @@ class DateRangePicker extends Field
     public function isInline(): bool
     {
         return $this->evaluate($this->isInline);
+    }
+
+    public function getEnabledDates(): ?array
+    {
+        $enabledDates = $this->evaluate($this->enabledDates);
+        
+        if ($enabledDates === null) {
+            return null;
+        }
+        
+        return array_map(function ($date) {
+            if ($date instanceof CarbonInterface) {
+                return $date->format('Y-m-d');
+            }
+            
+            if (is_string($date)) {
+                try {
+                    return Carbon::parse($date)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    return null;
+                }
+            }
+            
+            return null;
+        }, $enabledDates);
     }
 }

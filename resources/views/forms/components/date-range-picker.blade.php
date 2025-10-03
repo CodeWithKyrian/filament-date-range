@@ -28,6 +28,7 @@
             dualCalendar: @js($shouldDisplayDualCalendar()),
             isReadOnly: @js($isReadOnly()),
             isDisabled: @js($isDisabled()),
+            enabledDates: @js($getEnabledDates()),
         })" x-on:click.away="if(isOpen()) cancelSelectionAndClose()"
         x-on:keydown.esc="if(isOpen()) cancelSelectionAndClose()"
         {{ $attributes->merge($getExtraAlpineAttributes(), escape: false)->class(['fi-fo-date-range-picker']) }}>
