@@ -8,7 +8,7 @@
     "dev:css": "tailwindcss -i ./resources/css/date-range-picker.css -o ./dist/css/date-range-picker.css --postcss --minify",
     "dev": "npm run dev:js && npm run dev:css --watch",
     "build:js": "node bin/build.js",
-    "build:css": "tailwindcss -i ./resources/css/date-range-picker.css -o ./dist/css/date-range-picker.css --postcss --minify",
+    "build:css": "npx @tailwindcss/cli -i ./resources/css/date-range-picker.css -o ./dist/css/date-range-picker.css --postcss --minify",
     "build": "npm run build:js && npm run build:css"
   },
   "keywords": [],
