@@ -6,7 +6,7 @@
     $endId = $id . '_end';
     $statePath = $getStatePath();
 
-    $separator = $getSeparator();
+    $separator = $field->getSeparatorHtml();
     $isInline = $isInline();
 
     $isRtl = in_array($getLocale(), ['ar', 'fa', 'he', 'ur']);

@@ -2,6 +2,7 @@
 
 namespace CodeWithKyrian\FilamentDateRange\Forms\Components;
 
+use BackedEnum;
 use Carbon\CarbonInterface;
 use Carbon\Exceptions\InvalidFormatException;
 use Closure;
@@ -36,8 +37,6 @@ class DateRangePicker extends Field
 
     protected int | Closure $firstDayOfWeek = 0;
 
-    protected string | Closure | null $separator = 'to';
-
     protected string | Closure | null $startPlaceholder = null;
 
     protected string | Closure | null $endPlaceholder = null;
@@ -59,6 +58,8 @@ class DateRangePicker extends Field
         parent::setUp();
 
         $this->inline(true);
+
+        $this->separator('to');
 
         $this->default([
             'start' => null,
@@ -182,15 +183,16 @@ class DateRangePicker extends Field
         return $this;
     }
 
-    public function separator(string | Closure | null $separator = 'to'): static
+    public function separator(string | Htmlable | Closure | null $separator = 'to'): static
     {
         $this->separator = $separator;
         return $this;
     }
 
-    public function separatorIcon(string | Closure | null $icon): static
+    public function separatorIcon(string | BackedEnum | bool | null $icon = null): static
     {
         $this->separator(static function () use ($icon) {
+            $icon = $icon instanceof BackedEnum ? $icon->value : $icon;
             return new HtmlString(Blade::render('<x-filament::icon icon="' . $icon . '" class="w-5 h-5" />'));
         });
 
@@ -312,7 +314,7 @@ class DateRangePicker extends Field
         return $this->evaluate($this->firstDayOfWeek);
     }
 
-    public function getSeparator(): string | null
+    public function getSeparatorHtml(): string | Htmlable | null
     {
         return $this->evaluate($this->separator);
     }
