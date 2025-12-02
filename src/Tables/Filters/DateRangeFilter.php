@@ -43,7 +43,9 @@ class DateRangeFilter extends BaseFilter
 
     protected bool | Closure $isLabelHidden = false;
 
+    protected string|Closure $defaultFormat = 'Y-m-d';
 
+    protected string|Closure $defaultDisplayFormat = 'M j, Y';
     protected function setUp(): void
     {
         parent::setUp();
@@ -64,17 +66,17 @@ class DateRangeFilter extends BaseFilter
             $label = $this->getLabel();
 
             if ($start && !$end) {
-                $start = Carbon::parse($start)->translatedFormat($this->getDisplayFormatForIndicator());
+                $start = Carbon::parse($start)->translatedFormat($this->getDisplayFormat());
                 return "{$label}: " . __('filament-date-range::picker.filters.from') . " {$start}";
             }
 
             if (!$start && $end) {
-                $end = Carbon::parse($end)->translatedFormat($this->getDisplayFormatForIndicator());
+                $end = Carbon::parse($end)->translatedFormat($this->getDisplayFormat());
                 return "{$label}: " . __('filament-date-range::picker.filters.until') . " {$end}";
             }
 
-            $start = Carbon::parse($start)->translatedFormat($this->getDisplayFormatForIndicator());
-            $end = Carbon::parse($end)->translatedFormat($this->getDisplayFormatForIndicator());
+            $start = Carbon::parse($start)->translatedFormat($this->getDisplayFormat());
+            $end = Carbon::parse($end)->translatedFormat($this->getDisplayFormat());
 
             return "{$label}: {$start} - {$end}";
         });
@@ -234,17 +236,12 @@ class DateRangeFilter extends BaseFilter
 
     public function getDisplayFormat(): string
     {
-        return $this->evaluate($this->displayFormat) ?? DateRangePicker::$defaultDisplayFormat;
-    }
-
-    public function getDisplayFormatForIndicator(): string // Can be different if needed
-    {
-        return $this->evaluate($this->displayFormat) ?? DateRangePicker::$defaultDisplayFormat;
+        return $this->evaluate($this->displayFormat) ?? $this->evaluate($this->defaultDisplayFormat);
     }
 
     public function getFormat(): string
     {
-        return $this->evaluate($this->format) ?? DateRangePicker::$defaultFormat;
+        return $this->evaluate($this->format) ?? $this->evaluate($this->defaultFormat);
     }
 
     public function getMinDate(): CarbonInterface | string | Closure | null
