@@ -20,6 +20,13 @@ It has a remarkably small footprint (JS ~105KB, gzipped ~26.2KB), ensuring your 
 *   **Localization Ready:** Comes with translations for many common locales.
 *   **Seamless Filament Integration:** Designed to look and feel native to the Filament ecosystem.
 
+## Version Compatibility
+
+| Filament | Filament DateRange |
+| :--- | :--- |
+| 3.x | 1.x |
+| 4.x | 2.x |
+
 ## Installation
 
 You can install the package via Composer:
@@ -134,6 +141,30 @@ DateRangePicker::make('log_period')
     ->format('Y-m-d H:i:s') // Stores as "2024-01-15 10:30:00"
 ```
 
+#### `defaultFormat(string | Closure $format)`
+
+Sets the default storage format for all instances of the `DateRangePicker`. This is useful if you want to set a global format for your application.
+
+```php
+use CodeWithKyrian\FilamentDateRange\Forms\Components\DateRangePicker;
+
+DateRangePicker::configureUsing(function (DateRangePicker $picker) {
+    $picker->defaultFormat('Y-m-d H:i:s');
+});
+```
+
+#### `defaultDisplayFormat(string | Closure $format)`
+
+Sets the default display format for all instances of the `DateRangePicker`.
+
+```php
+use CodeWithKyrian\FilamentDateRange\Forms\Components\DateRangePicker;
+
+DateRangePicker::configureUsing(function (DateRangePicker $picker) {
+    $picker->defaultDisplayFormat('d/m/Y');
+});
+```
+
 #### `minDate(CarbonInterface | string | Closure | null $date)`
 
 Sets the earliest selectable date. Dates before this will be disabled in the calendar.
@@ -192,6 +223,24 @@ DateRangePicker::make('work_schedule')
     ->firstDayOfWeek(1) // Week starts on Monday
 ```
 ![Calendar popover with Monday as the first column.](art/form-field-firstday-monday.png)
+
+#### `weekStartsOnMonday()`
+
+Convenience method to set the first day of the week to Monday.
+
+```php
+DateRangePicker::make('work_schedule')
+    ->weekStartsOnMonday()
+```
+
+#### `weekStartsOnSunday()`
+
+Convenience method to set the first day of the week to Sunday.
+
+```php
+DateRangePicker::make('work_schedule')
+    ->weekStartsOnSunday()
+```
 
 #### `startPlaceholder(string | Closure | null $placeholder)`
 
