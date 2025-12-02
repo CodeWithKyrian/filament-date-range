@@ -526,6 +526,13 @@ export default function dateRangePickerFormComponent({
 			return d.isAfter(startRange, "day") && d.isBefore(endRange, "day");
 		},
 
+		hasRange() {
+			return !!(this.start && (
+				(this.end && !this.start.isSame(this.end, 'day')) ||
+				(this.hoveredEndDate && !this.start.isSame(this.hoveredEndDate, 'day'))
+			));
+		},
+
 		isOpen() {
 			return this.$refs.panel?.style.display === 'block';
 		},
