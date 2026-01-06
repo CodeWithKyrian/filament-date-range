@@ -83,21 +83,21 @@ class DateRangeFilter extends BaseFilter
 
         $this->schema([
             DateRangePicker::make($this->getName())
-                ->label($this->getLabel())
-                ->hiddenLabel($this->isLabelHidden())
-                ->displayFormat($this->getDisplayFormat())
-                ->format($this->getFormat())
-                ->minDate($this->getMinDate())
-                ->maxDate($this->getMaxDate())
-                ->timezone($this->getTimezone())
-                ->locale($this->getLocale())
-                ->firstDayOfWeek($this->getFirstDayOfWeek())
-                ->startPlaceholder($this->getStartPlaceholder())
-                ->endPlaceholder($this->getEndPlaceholder())
-                ->autoClose($this->shouldAutoClose())
-                ->dualCalendar($this->shouldDisplayDualCalendar())
-                ->inline($this->isInline())
-                ->enabledDates($this->getEnabledDates())
+                ->label(fn(): string => $this->getLabel())
+                ->hiddenLabel(fn(): bool => $this->isLabelHidden())
+                ->displayFormat(fn(): string => $this->getDisplayFormat())
+                ->format(fn(): string => $this->getFormat())
+                ->minDate(fn() => $this->getMinDate())
+                ->maxDate(fn() => $this->getMaxDate())
+                ->timezone(fn(): string => $this->getTimezone())
+                ->locale(fn(): string => $this->getLocale())
+                ->firstDayOfWeek(fn(): int => $this->getFirstDayOfWeek())
+                ->startPlaceholder(fn(): ?string => $this->getStartPlaceholder())
+                ->endPlaceholder(fn(): ?string => $this->getEndPlaceholder())
+                ->autoClose(fn(): bool => $this->shouldAutoClose())
+                ->dualCalendar(fn(): bool => $this->shouldDisplayDualCalendar())
+                ->inline(fn(): bool => $this->isInline())
+                ->enabledDates(fn(): ?array => $this->getEnabledDates())
         ]);
     }
 
@@ -302,13 +302,13 @@ class DateRangeFilter extends BaseFilter
     public function getEnabledDates(): ?array
     {
         $enabledDates = $this->evaluate($this->enabledDates);
-        
+
         if ($enabledDates === null) {
             return null;
         }
-        
+
         $formattedDates = [];
-        
+
         foreach ($enabledDates as $date) {
             if ($date instanceof CarbonInterface) {
                 $formattedDates[] = $date->format('Y-m-d');
@@ -318,7 +318,8 @@ class DateRangeFilter extends BaseFilter
             if (is_string($date)) {
                 try {
                     $formattedDates[] = Carbon::parse($date)->format('Y-m-d');
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             }
         }
 
