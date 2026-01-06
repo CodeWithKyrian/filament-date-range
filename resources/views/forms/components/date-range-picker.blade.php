@@ -77,7 +77,7 @@
                             placeholder="{{ $getStartPlaceholder() }}"
                             wire:key="{{ $livewireKey }}.start-display"
                             :disabled="isDisabled || isReadOnly"
-                            class="w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)] sm:text-sm sm:leading-6"
+                            class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
                             :class="{ 'font-semibold': isOpen() && activeEnd === 'start' }" 
                         />
                         <button 
@@ -132,7 +132,7 @@
                             placeholder="{{ $getEndPlaceholder() }}" 
                             wire:key="{{ $livewireKey }}.end-display"
                             :disabled="isDisabled || isReadOnly"
-                            class="w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)] sm:text-sm sm:leading-6"
+                            class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
                             :class="{ 'font-semibold': isOpen() && activeEnd === 'end' }" 
                         />
                         <button 
