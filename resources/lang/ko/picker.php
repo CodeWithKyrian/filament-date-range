@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => '부터',
         'until' => '까지',
-    ]
+    ],
+    'presets' => [
+        'heading' => '사전 설정',
+        'last_7_days' => '최근 7일',
+        'last_14_days' => '최근 2주',
+        'last_30_days' => '최근 30일',
+        'this_month' => '이번 달',
+        'last_month' => '지난 달',
+        'this_year' => '올해',
+        'last_year' => '작년',
+        'custom_range' => '사용자 지정 범위',
+    ],
 ];

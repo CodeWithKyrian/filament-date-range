@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => 'Od',
         'until' => 'Do',
-    ]
+    ],
+    'presets' => [
+        'heading' => 'Předvolby',
+        'last_7_days' => 'Posledních 7 dní',
+        'last_14_days' => 'Poslední 2 týdny',
+        'last_30_days' => 'Posledních 30 dní',
+        'this_month' => 'Tento měsíc',
+        'last_month' => 'Minulý měsíc',
+        'this_year' => 'Tento rok',
+        'last_year' => 'Minulý rok',
+        'custom_range' => 'Vlastní rozsah',
+    ],
 ];
