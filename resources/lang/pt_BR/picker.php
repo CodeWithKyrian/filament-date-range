@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => 'De',
         'until' => 'Até',
-    ]
+    ],
+    'presets' => [
+        'heading' => 'Predefinições',
+        'last_7_days' => 'Últimos 7 dias',
+        'last_14_days' => 'Últimas 2 semanas',
+        'last_30_days' => 'Últimos 30 dias',
+        'this_month' => 'Este mês',
+        'last_month' => 'Mês passado',
+        'this_year' => 'Este ano',
+        'last_year' => 'Ano passado',
+        'custom_range' => 'Intervalo personalizado',
+    ],
 ];

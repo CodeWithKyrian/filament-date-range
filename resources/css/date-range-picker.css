@@ -26,7 +26,7 @@
 
 .fi-date-range-picker {
     & .drp-calendar-day {
-        @apply p-1.5 text-center text-xs transition duration-75;
+        @apply p-1.5 text-xs transition duration-75 flex items-center justify-center leading-none;
 
         &.is-disabled {
             @apply pointer-events-none opacity-50 cursor-not-allowed;

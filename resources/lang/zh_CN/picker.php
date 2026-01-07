@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => '从',
         'until' => '至',
-    ]
+    ],
+    'presets' => [
+        'heading' => '预设',
+        'last_7_days' => '最近7天',
+        'last_14_days' => '最近2周',
+        'last_30_days' => '最近30天',
+        'this_month' => '本月',
+        'last_month' => '上月',
+        'this_year' => '今年',
+        'last_year' => '去年',
+        'custom_range' => '自定义范围',
+    ],
 ];

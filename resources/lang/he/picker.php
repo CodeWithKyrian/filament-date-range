@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => 'מ',
         'until' => 'עד',
-    ]
+    ],
+    'presets' => [
+        'heading' => 'הגדרות מראש',
+        'last_7_days' => '7 הימים האחרונים',
+        'last_14_days' => '2 השבועות האחרונים',
+        'last_30_days' => '30 הימים האחרונים',
+        'this_month' => 'החודש הזה',
+        'last_month' => 'חודש שעבר',
+        'this_year' => 'השנה הזו',
+        'last_year' => 'שנה שעברה',
+        'custom_range' => 'טווח מותאם אישית',
+    ],
 ];

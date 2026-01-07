@@ -14,6 +14,8 @@ It has a remarkably small footprint (JS ~105KB, gzipped ~26.2KB), ensuring your 
 
 *   **Intuitive Date Range Picker Form Field:** Allows users to easily select "start" and "end" dates.
 *   **Powerful Table Filter:** Seamlessly filter your table records by date ranges.
+*   **Quick Preset Ranges:** Optional sidebar with common ranges like Today, Yesterday, Last 7 Days, This Month, etc.
+*   **Single Field Mode:** Optionally render a single input that displays the full date range (e.g. for compact table filters).
 *   **Lightweight & Performant:** Pure AlpineJS implementation with a minimal asset footprint.
 *   **Highly Customizable:** Extensive API for tailoring appearance, behavior, date formats, locales, and more.
 *   **RTL Support:** Automatically adjusts for right-to-left languages.
@@ -285,6 +287,33 @@ DateRangePicker::make('conference_dates')
 ```
 ![Calendar popover with "Apply" and "Cancel" buttons visible.](art/form-field-no-autoclose.png)
 
+#### `presets(bool | array| Closure $condition = true)`
+
+Enables a presets sidebar in the calendar popover with common ranges such as **Last 7 Days**, **Last 2 Weeks**, **Last 30 Days**, **This Month**, **Last Month**, **This Year**, and **Last Year**.  
+You can pass:
+- `true` (default when calling `->presets()` with no arguments) to use the built-in list.
+- `false` to disable presets.
+- an `array` (or `Closure` that returns an array) of preset definitions to customize which presets are shown.
+
+```php
+DateRangePicker::make('order_period')
+    ->label('Order Period')
+    ->presets(); // use built-in presets
+
+DateRangePicker::make('order_period_custom')
+    ->label('Order Period')
+    ->presets([
+        // Just keys (uses built-in labels)
+        'last_7_days',
+        'last_14_days',
+
+        // Or explicit key + custom label
+        ['key' => 'this_month', 'label' => 'Current Month'],
+    ]);
+```
+
+![Date range picker showing a presets sidebar with common ranges like Last 7 Days and Last 2 Weeks.](art/form-field-presets.png)
+
 #### `dualCalendar(bool | Closure $condition = true)`
 
 Determines if two calendars (for consecutive months) should be displayed side-by-side in the popover. Defaults to `true` (dual calendars). Set to `false` to display a single calendar.
@@ -311,6 +340,18 @@ DateRangePicker::make('event_period')
     ->stacked() // Display inputs vertically stacked
 ```
 ![Date range picker with inputs displayed vertically stacked.](art/form-field-stacked.png)
+
+#### `singleField(bool | Closure $condition = true)`
+
+Renders a single input that displays the entire date range (for example: `Jan 3, 2026 — Jan 8, 2026`) instead of separate start and end inputs. This works especially well for compact layouts.
+
+```php
+DateRangePicker::make('invoice_period')
+    ->label('Invoice Period')
+    ->singleField();
+```
+
+![Single input field displaying the full selected date range.](art/form-field-single-field.png)
 
 #### `readOnly(bool | Closure $condition = true)`
 

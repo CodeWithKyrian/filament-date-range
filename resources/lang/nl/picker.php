@@ -12,5 +12,16 @@ return [
     'filters' => [
         'from' => 'Vanaf',
         'until' => 'Tot',
-    ]
+    ],
+    'presets' => [
+        'heading' => 'Voorinstellingen',
+        'last_7_days' => 'Laatste 7 dagen',
+        'last_14_days' => 'Laatste 2 weken',
+        'last_30_days' => 'Laatste 30 dagen',
+        'this_month' => 'Deze maand',
+        'last_month' => 'Vorige maand',
+        'this_year' => 'Dit jaar',
+        'last_year' => 'Vorig jaar',
+        'custom_range' => 'Aangepast bereik',
+    ],
 ];
