@@ -27,6 +27,9 @@ export default function dateRangePickerFormComponent({
 	isDisabled = false,
 	dualCalendar = true,
 	enabledDates = null,
+	singleField = false,
+	hasPresets = false,
+	presets = [],
 }) {
 	const timezone = dayjs.tz.guess();
 
@@ -34,6 +37,7 @@ export default function dateRangePickerFormComponent({
 		state,
 		startDisplay: "",
 		endDisplay: "",
+		rangeDisplay: "",
 
 		start: null,
 		end: null,
@@ -73,6 +77,12 @@ export default function dateRangePickerFormComponent({
 		dualCalendar,
 		enabledDates,
 
+		singleField,
+
+		hasPresets,
+		presets,
+		activePreset: null,
+
 		init() {
 			dayjs.locale(locales[locale] ?? locales['en'])
 
@@ -97,9 +107,16 @@ export default function dateRangePickerFormComponent({
 					this.start = newStart;
 					this.end = newEnd;
 					this.updateDisplayValues();
+					if (this.hasPresets) {
+						this.checkIfMatchesPreset();
+					}
 					if (this.isOpen()) this.generateCalendarBasedOnActiveEnd();
 				}
 			});
+
+			if (this.hasPresets) {
+				this.checkIfMatchesPreset();
+			}
 		},
 
 		getDatesFromState(currentState = this.state) {
@@ -124,15 +141,40 @@ export default function dateRangePickerFormComponent({
 				start: this.start?.format("YYYY-MM-DD"),
 				end: this.end?.format("YYYY-MM-DD")
 			};
+
+			if (this.hasPresets) {
+				this.checkIfMatchesPreset();
+			}
 		},
 
 		openCalendar(targetEnd) {
 			if (this.isDisabled || this.isReadOnly) return;
 
-			this.activeEnd = targetEnd;
+			// In single field mode, intelligently determine which end to focus on
+			if (this.singleField) {
+				// If we have start but no end, focus on selecting end date
+				if (this.start && !this.end) {
+					this.activeEnd = 'end';
+				}
+				// If we have both dates, start with start (user can edit start, then it auto-switches to end)
+				else if (this.start && this.end) {
+					this.activeEnd = 'start';
+				}
+				// No dates yet, start with start
+				else {
+					this.activeEnd = 'start';
+				}
+			} else {
+				// Dual field mode: use the provided targetEnd
+				this.activeEnd = targetEnd;
+			}
+
 			this.isAwaitingEndDate = (this.activeEnd === 'start' && !this.end) || (this.activeEnd === 'end' && !this.start);
 			this.hoveredStartDate = null;
 			this.hoveredEndDate = null;
+			if (this.hasPresets) {
+				this.activePreset = null;
+			}
 
 			if (!this.autoClose) {
 				this.originalStart = this.start ? this.start.clone() : null;
@@ -349,8 +391,16 @@ export default function dateRangePickerFormComponent({
 				} else {
 					// Check if the range is continuous before completing
 					if (this.isRangeContinuous(this.start, this.end)) {
-						this.isAwaitingEndDate = false;
-						rangeCompleted = true;
+						// In single field mode, always switch to end mode after selecting start
+						// so user can edit the end date if needed
+						if (this.singleField) {
+							this.isAwaitingEndDate = true;
+							this.activeEnd = 'end';
+							shouldSwitchActiveEnd = false;
+						} else {
+							this.isAwaitingEndDate = false;
+							rangeCompleted = true;
+						}
 					} else {
 						// Range is not continuous, reset end date
 						this.end = null;
@@ -435,6 +485,164 @@ export default function dateRangePickerFormComponent({
 			this.endDisplay = this.end
 				? this.end.format(this.displayFormat)
 				: "";
+
+			const startFormatted = this.start ? this.start.format(this.displayFormat) : "";
+			const endFormatted = this.end ? this.end.format(this.displayFormat) : "";
+
+			if (this.start && this.end) {
+				this.rangeDisplay = `${startFormatted} — ${endFormatted}`;
+			} else if (this.start) {
+				this.rangeDisplay = startFormatted;
+			} else if (this.end) {
+				this.rangeDisplay = endFormatted;
+			} else {
+				this.rangeDisplay = "";
+			}
+		},
+
+		clearAllDates() {
+			this.start = null;
+			this.end = null;
+			this.hoveredStartDate = null;
+			this.hoveredEndDate = null;
+			if (this.hasPresets) {
+				this.activePreset = null;
+			}
+			this.updateDisplayValues();
+			this.updateState();
+		},
+
+		checkIfMatchesPreset() {
+			if (!this.hasPresets || !this.start || !this.end) {
+				this.activePreset = null;
+				return;
+			}
+
+			const now = dayjs().tz(timezone);
+
+			const isSameRange = (rangeStart, rangeEnd) => {
+				return this.start.isSame(rangeStart, 'day') && this.end.isSame(rangeEnd, 'day');
+			};
+
+			const last7Start = now.subtract(6, 'day').startOf('day');
+			const last7End = now.endOf('day');
+			if (isSameRange(last7Start, last7End)) {
+				this.activePreset = 'last_7_days';
+				return;
+			}
+
+			const last14Start = now.subtract(13, 'day').startOf('day');
+			const last14End = now.endOf('day');
+			if (isSameRange(last14Start, last14End)) {
+				this.activePreset = 'last_14_days';
+				return;
+			}
+
+			const last30Start = now.subtract(29, 'day').startOf('day');
+			const last30End = now.endOf('day');
+			if (isSameRange(last30Start, last30End)) {
+				this.activePreset = 'last_30_days';
+				return;
+			}
+
+			const thisMonthStart = now.startOf('month');
+			const thisMonthEnd = now.endOf('month');
+			if (isSameRange(thisMonthStart, thisMonthEnd)) {
+				this.activePreset = 'this_month';
+				return;
+			}
+
+			const lastMonthStart = now.subtract(1, 'month').startOf('month');
+			const lastMonthEnd = now.subtract(1, 'month').endOf('month');
+			if (isSameRange(lastMonthStart, lastMonthEnd)) {
+				this.activePreset = 'last_month';
+				return;
+			}
+
+			const thisYearStart = now.startOf('year');
+			const thisYearEnd = now.endOf('year');
+			if (isSameRange(thisYearStart, thisYearEnd)) {
+				this.activePreset = 'this_year';
+				return;
+			}
+
+			const lastYearStart = now.subtract(1, 'year').startOf('year');
+			const lastYearEnd = now.subtract(1, 'year').endOf('year');
+			if (isSameRange(lastYearStart, lastYearEnd)) {
+				this.activePreset = 'last_year';
+				return;
+			}
+
+			this.activePreset = 'custom_range';
+		},
+
+		applyPreset(presetKey) {
+			if (!this.hasPresets) return;
+
+			const now = dayjs().tz(timezone);
+			let startDate;
+			let endDate;
+
+			switch (presetKey) {
+				case 'last_7_days':
+					startDate = now.subtract(6, 'day').startOf('day');
+					endDate = now.endOf('day');
+					break;
+				case 'last_14_days':
+					startDate = now.subtract(13, 'day').startOf('day');
+					endDate = now.endOf('day');
+					break;
+				case 'last_30_days':
+					startDate = now.subtract(29, 'day').startOf('day');
+					endDate = now.endOf('day');
+					break;
+				case 'this_month':
+					startDate = now.startOf('month');
+					endDate = now.endOf('month');
+					break;
+				case 'last_month':
+					startDate = now.subtract(1, 'month').startOf('month');
+					endDate = now.subtract(1, 'month').endOf('month');
+					break;
+				case 'this_year':
+					startDate = now.startOf('year');
+					endDate = now.endOf('year');
+					break;
+				case 'last_year':
+					startDate = now.subtract(1, 'year').startOf('year');
+					endDate = now.subtract(1, 'year').endOf('year');
+					break;
+				default:
+					return;
+			}
+
+			if (this.minDate && startDate.isBefore(this.minDate, 'day')) {
+				startDate = this.minDate.clone().startOf('day');
+			}
+
+			if (this.maxDate && endDate.isAfter(this.maxDate, 'day')) {
+				endDate = this.maxDate.clone().endOf('day');
+			}
+
+			if (!this.isRangeContinuous(startDate, endDate)) {
+				return;
+			}
+
+			this.start = startDate;
+			this.end = endDate;
+			this.activePreset = presetKey;
+			this.hoveredStartDate = null;
+			this.hoveredEndDate = null;
+
+			this.updateDisplayValues();
+			this.updateState();
+
+			this.setInitialCalendarMonths();
+			this.generateCalendars();
+
+			if (this.autoClose) {
+				this.applySelectionAndClose();
+			}
 		},
 
 		clearDateTarget(target) {

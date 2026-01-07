@@ -46,9 +46,20 @@ class DateRangePicker extends Field
 
     protected bool|Closure $dualCalendar = true;
 
+    protected bool|Closure $singleField = false;
+
     protected bool|Closure $isInline = true;
 
     protected array|Closure|null $enabledDates = null;
+
+    /**
+     * Presets configuration.
+     *
+     * - `false` (default): presets are disabled.
+     * - `true`: use the built-in preset ranges (Today, Yesterday, Last 7 Days, etc.).
+     * - `array`: custom preset definitions, resolved at runtime.
+     */
+    protected bool|array|Closure $presets = false;
 
     protected string|Closure $defaultFormat = 'Y-m-d';
 
@@ -180,9 +191,34 @@ class DateRangePicker extends Field
         return $this;
     }
 
+    /**
+     * Configure preset ranges for the calendar popover.
+     *
+     * When `$presets` is:
+     * - `true`  => enable the built-in presets.
+     * - `false` => disable presets.
+     * - `array` => use a custom array of preset definitions.
+     */
+    public function presets(bool|array|Closure $presets = true): static
+    {
+        $this->presets = $presets;
+
+        return $this;
+    }
+
     public function dualCalendar(bool|Closure $condition = true): static
     {
         $this->dualCalendar = $condition;
+        return $this;
+    }
+
+    /**
+     * Render a single input showing the selected range, instead of two inputs.
+     */
+    public function singleField(bool|Closure $condition = true): static
+    {
+        $this->singleField = $condition;
+
         return $this;
     }
 
@@ -282,6 +318,113 @@ class DateRangePicker extends Field
         return $this->evaluate($this->separator);
     }
 
+    public function shouldShowPresets(): bool
+    {
+        $presets = $this->evaluate($this->presets);
+
+        if ($presets === false || $presets === null) {
+            return false;
+        }
+
+        return ! empty($this->getPresets());
+    }
+
+    /**
+     * Resolve presets into a normalized array that the front-end can consume.
+     *
+     * Each preset will have the shape: ['key' => string, 'label' => string].
+     *
+     * Custom presets are limited to the known keys supported by the JS logic:
+     * last_7_days, last_14_days, last_30_days, this_month, last_month, this_year, last_year.
+     */
+    public function getPresets(): array
+    {
+        $presets = $this->evaluate($this->presets);
+
+        if ($presets === false || $presets === null) {
+            return [];
+        }
+
+        // Use the built-in list.
+        if ($presets === true) {
+            return $this->getDefaultPresets();
+        }
+
+        if (! is_array($presets)) {
+            throw new \InvalidArgumentException('DateRangePicker presets must be a boolean or an array.');
+        }
+
+        $allowedKeys = [
+            'last_7_days',
+            'last_14_days',
+            'last_30_days',
+            'this_month',
+            'last_month',
+            'this_year',
+            'last_year',
+        ];
+
+        $normalized = [];
+
+        foreach ($presets as $preset) {
+            // Allow passing just the key string for convenience.
+            if (is_string($preset)) {
+                $preset = ['key' => $preset];
+            }
+
+            if (! is_array($preset) || ! isset($preset['key'])) {
+                throw new \InvalidArgumentException('Each DateRangePicker preset must be an array with at least a "key" key.');
+            }
+
+            $key = $preset['key'];
+
+            if (! in_array($key, $allowedKeys, true)) {
+                throw new \InvalidArgumentException("Unsupported DateRangePicker preset key [{$key}].");
+            }
+
+            $normalized[] = [
+                'key' => $key,
+                'label' => $preset['label'] ?? $this->getDefaultPresetLabel($key),
+            ];
+        }
+
+        return $normalized;
+    }
+
+    protected function getDefaultPresets(): array
+    {
+        $keys = [
+            'last_7_days',
+            'last_14_days',
+            'last_30_days',
+            'this_month',
+            'last_month',
+            'this_year',
+            'last_year',
+        ];
+
+        return array_map(function (string $key): array {
+            return [
+                'key' => $key,
+                'label' => $this->getDefaultPresetLabel($key),
+            ];
+        }, $keys);
+    }
+
+    protected function getDefaultPresetLabel(string $key): string
+    {
+        return match ($key) {
+            'last_7_days' => __('filament-date-range::picker.presets.last_7_days'),
+            'last_14_days' => __('filament-date-range::picker.presets.last_14_days'),
+            'last_30_days' => __('filament-date-range::picker.presets.last_30_days'),
+            'this_month' => __('filament-date-range::picker.presets.this_month'),
+            'last_month' => __('filament-date-range::picker.presets.last_month'),
+            'this_year' => __('filament-date-range::picker.presets.this_year'),
+            'last_year' => __('filament-date-range::picker.presets.last_year'),
+            default => $key,
+        };
+    }
+
     public function getStartPlaceholder(): ?string
     {
         return $this->evaluate($this->startPlaceholder) ?? __('filament-date-range::picker.placeholders.start_date', locale: $this->getLocale());
@@ -307,6 +450,11 @@ class DateRangePicker extends Field
         return $this->evaluate($this->isInline);
     }
 
+    public function isSingleField(): bool
+    {
+        return $this->evaluate($this->singleField);
+    }
+
     public function getEnabledDates(): ?array
     {
         $enabledDates = $this->evaluate($this->enabledDates);
@@ -316,7 +464,7 @@ class DateRangePicker extends Field
         }
 
         $formattedDates = [];
-        
+
         foreach ($enabledDates as $date) {
             if ($date instanceof CarbonInterface) {
                 $formattedDates[] = $date->format('Y-m-d');
@@ -326,7 +474,8 @@ class DateRangePicker extends Field
             if (is_string($date)) {
                 try {
                     $formattedDates[] = Carbon::parse($date)->format('Y-m-d');
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             }
         }
 

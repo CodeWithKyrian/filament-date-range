@@ -8,6 +8,9 @@
 
     $separator = $field->getSeparatorHtml();
     $isInline = $isInline();
+    $isSingleField = $isSingleField();
+    $presets = $getPresets();
+    $showPresets = !empty($presets);
 
     $isRtl = in_array($getLocale(), ['ar', 'fa', 'he', 'ur']);
     $prevMonthIcon = $isRtl ? 'heroicon-o-chevron-right' : 'heroicon-o-chevron-left';
@@ -21,7 +24,7 @@
     :inline-label-vertical-alignment="\Filament\Support\Enums\VerticalAlignment::Center"
 >
     <div 
-        x-load 
+        x-load
         x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('date-range-picker', 'codewithkyrian/filament-date-range') }}"
         x-data="dateRangePickerFormComponent({
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
@@ -35,7 +38,10 @@
             isReadOnly: @js($isReadOnly()),
             isDisabled: @js($isDisabled()),
             enabledDates: @js($getEnabledDates()),
-        })"
+            singleField: @js($isSingleField),
+            hasPresets: @js($showPresets),
+            presets: @js($presets),
+        })" 
         wire:ignore 
         x-on:click.away="if(isOpen()) cancelSelectionAndClose()"
         x-on:keydown.esc="if(isOpen()) cancelSelectionAndClose()"
@@ -46,16 +52,13 @@
             'items-center gap-3' => $isInline,
             'flex-col gap-2' => !$isInline,
         ])>
-            {{-- Start --}}
-            <div @class([
-                'min-w-0', 'flex-1' => $isInline, 
-                'w-full' => !$isInline
-                ])>
+            {{-- Single field --}}
+            @if ($isSingleField)
                 <x-filament::input.wrapper 
                     :disabled="$isDisabled()" 
                     :inline-prefix="$isStartPrefixInline()" 
                     :inline-suffix="$isStartSuffixInline()" 
-                    :prefix="$getStartPrefixLabel()"
+                    :prefix="$getStartPrefixLabel()" 
                     :prefix-actions="$getStartPrefixActions()" 
                     :prefix-icon="$getStartPrefixIcon()" 
                     :prefix-icon-color="$getStartPrefixIconColor()" 
@@ -63,92 +66,135 @@
                     :suffix-actions="$getStartSuffixActions()"
                     :suffix-icon="$getStartSuffixIcon()" 
                     :suffix-icon-color="$getStartSuffixIconColor()" 
-                    :valid="!$errors->has($statePath . '.start')"
-                    class="relative fi-fo-date-range-picker-start-wrapper"
+                    :valid="!$errors->has($statePath . '.start') && !$errors->has($statePath . '.end')"
+                    class="relative fi-fo-date-range-picker-single-wrapper w-full"
                     >
                     <div class="relative grow">
                         <input 
-                            x-ref="startInput" 
-                            id="{{ $startId }}" 
+                            x-ref="singleInput" 
+                            id="{{ $id }}" 
                             type="text" 
                             readonly 
-                            x-model="startDisplay"
+                            x-model="rangeDisplay"
                             x-on:click="!isDisabled && !isReadOnly && openCalendar('start')"
-                            placeholder="{{ $getStartPlaceholder() }}"
-                            wire:key="{{ $livewireKey }}.start-display"
+                            placeholder="{{ $getStartPlaceholder() }}" 
+                            wire:key="{{ $livewireKey }}.range-display"
                             :disabled="isDisabled || isReadOnly"
                             class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
-                            :class="{ 'font-semibold': isOpen() && activeEnd === 'start' }" 
+                            :class="{ 'font-semibold': isOpen() }" 
                         />
                         <button 
                             type="button" 
                             tabindex="-1" 
-                            x-show="!isReadOnly && !isDisabled && start"
-                            x-on:click.stop="clearDateTarget('start')" 
+                            x-show="!isReadOnly && !isDisabled && (start || end)"
+                            x-on:click.stop="clearAllDates()"
                             class="absolute top-1/2 -translate-y-1/2 appearance-none text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 end-2.5"
-                            title="{{ __('filament-forms::components.date_time_picker.actions.clear.label') }}" 
-                            x-cloak
-                        >
+                            title="{{ __('filament-forms::components.date_time_picker.actions.clear.label') }}" x-cloak>
                             <x-filament::icon icon="heroicon-m-x-mark" class="w-5 h-5" />
                         </button>
                     </div>
                 </x-filament::input.wrapper>
-            </div>
+            @else
+                {{-- Start --}}
+                <div @class(['min-w-0', 'flex-1' => $isInline, 'w-full' => !$isInline])>
+                    <x-filament::input.wrapper 
+                        :disabled="$isDisabled()" 
+                        :inline-prefix="$isStartPrefixInline()" 
+                        :inline-suffix="$isStartSuffixInline()" 
+                        :prefix="$getStartPrefixLabel()"
+                        :prefix-actions="$getStartPrefixActions()" 
+                        :prefix-icon="$getStartPrefixIcon()" 
+                        :prefix-icon-color="$getStartPrefixIconColor()" 
+                        :suffix="$getStartSuffixLabel()" 
+                        :suffix-actions="$getStartSuffixActions()"
+                        :suffix-icon="$getStartSuffixIcon()" 
+                        :suffix-icon-color="$getStartSuffixIconColor()" 
+                        :valid="!$errors->has($statePath . '.start')"
+                        class="relative fi-fo-date-range-picker-start-wrapper">
+                        <div class="relative grow">
+                            <input 
+                                x-ref="startInput" 
+                                id="{{ $startId }}" 
+                                type="text" 
+                                readonly
+                                x-model="startDisplay" 
+                                x-on:click="!isDisabled && !isReadOnly && openCalendar('start')"
+                                placeholder="{{ $getStartPlaceholder() }}" 
+                                wire:key="{{ $livewireKey }}.start-display"
+                                :disabled="isDisabled || isReadOnly"
+                                class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
+                                :class="{ 'font-semibold': isOpen() && activeEnd === 'start' }" 
+                            />
+                            <button 
+                                type="button" 
+                                tabindex="-1" 
+                                x-show="!isReadOnly && !isDisabled && start"
+                                x-on:click.stop="clearDateTarget('start')"
+                                class="absolute top-1/2 -translate-y-1/2 appearance-none text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 end-2.5"
+                                title="{{ __('filament-forms::components.date_time_picker.actions.clear.label') }}"
+                                x-cloak
+                            >
+                                <x-filament::icon icon="heroicon-m-x-mark" class="w-5 h-5" />
+                            </button>
+                        </div>
+                    </x-filament::input.wrapper>
+                </div>
 
-            {{-- Separator --}}
-            <div @class([
-                'inline-flex text-sm text-gray-500 dark:text-gray-400 fi-date-range-separator',
-                'shrink-0' => $isInline,
-                'justify-center' => !$isInline,
-            ])>
-                {{ $separator }}
-            </div>
+                {{-- Separator --}}
+                <div @class([
+                    'inline-flex text-sm text-gray-500 dark:text-gray-400 fi-date-range-separator',
+                    'shrink-0' => $isInline,
+                    'justify-center' => !$isInline,
+                ])>
+                    {{ $separator }}
+                </div>
 
-            {{-- End --}}
-            <div @class(['min-w-0', 'flex-1' => $isInline, 'w-full' => !$isInline])>
-                <x-filament::input.wrapper 
+                {{-- End --}}
+                <div @class(['min-w-0', 'flex-1' => $isInline, 'w-full' => !$isInline])>
+                    <x-filament::input.wrapper 
                     :disabled="$isDisabled()" 
                     :inline-prefix="$isEndPrefixInline()" 
-                    :inline-suffix="$isEndSuffixInline()" 
-                    :prefix="$getEndPrefixLabel()"
+                    :inline-suffix="$isEndSuffixInline()"
+                    :prefix="$getEndPrefixLabel()" 
                     :prefix-actions="$getEndPrefixActions()" 
                     :prefix-icon="$getEndPrefixIcon()" 
                     :prefix-icon-color="$getEndPrefixIconColor()" 
                     :suffix="$getEndSuffixLabel()" 
-                    :suffix-actions="$getEndSuffixActions()"
+                    :suffix-actions="$getEndSuffixActions()" 
                     :suffix-icon="$getEndSuffixIcon()" 
                     :suffix-icon-color="$getEndSuffixIconColor()" 
                     :valid="!$errors->has($statePath . '.end')"
                     class="fi-fo-date-range-picker-end-wrapper"
                 >
-                    <div class="relative grow">
-                        <input 
-                            x-ref="endInput" 
-                            id="{{ $endId }}" 
-                            type="text" 
-                            readonly 
-                            x-model="endDisplay"
-                            x-on:click="!isDisabled && !isReadOnly && openCalendar('end')"
-                            placeholder="{{ $getEndPlaceholder() }}" 
-                            wire:key="{{ $livewireKey }}.end-display"
-                            :disabled="isDisabled || isReadOnly"
-                            class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
-                            :class="{ 'font-semibold': isOpen() && activeEnd === 'end' }" 
-                        />
-                        <button 
-                            type="button" 
-                            tabindex="-1" 
-                            x-show="!isReadOnly && !isDisabled && end"
-                            x-on:click.stop="clearDateTarget('end')" 
-                            class="absolute top-1/2 -translate-y-1/2 appearance-none text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 end-2.5"
-                            title="{{ __('filament-forms::components.date_time_picker.actions.clear.label') }}" 
-                            x-cloak
-                        >
-                            <x-filament::icon icon="heroicon-m-x-mark" class="w-5 h-5" />
-                        </button>
-                    </div>
-                </x-filament::input.wrapper>
-            </div>
+                        <div class="relative grow">
+                            <input 
+                                x-ref="endInput" 
+                                id="{{ $endId }}" 
+                                type="text" 
+                                readonly
+                                x-model="endDisplay" 
+                                x-on:click="!isDisabled && !isReadOnly && openCalendar('end')"
+                                placeholder="{{ $getEndPlaceholder() }}" 
+                                wire:key="{{ $livewireKey }}.end-display"
+                                :disabled="isDisabled || isReadOnly"
+                                class="w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-gray-950 outline-hidden transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)]"
+                                :class="{ 'font-semibold': isOpen() && activeEnd === 'end' }" 
+                            />
+                            <button 
+                                type="button" 
+                                tabindex="-1" 
+                                x-show="!isReadOnly && !isDisabled && end"
+                                x-on:click.stop="clearDateTarget('end')"
+                                class="absolute top-1/2 -translate-y-1/2 appearance-none text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 end-2.5"
+                                title="{{ __('filament-forms::components.date_time_picker.actions.clear.label') }}"
+                                x-cloak
+                            >
+                                <x-filament::icon icon="heroicon-m-x-mark" class="w-5 h-5" />
+                            </button>
+                        </div>
+                    </x-filament::input.wrapper>
+                </div>
+            @endif
         </div>
 
         {{-- Calendar Popover --}}
@@ -164,64 +210,89 @@
                 'min-w-56': !dualCalendar
             }"
         >
-                {{-- Header: Month/Year and Nav --}}
-                <div class="flex relative justify-between items-center px-1 mb-2">
-                    <button 
-                        type="button"
-                        title="{{ __('filament-forms::components.date_time_picker.buttons.previous_month.label') }}"
-                        x-on:click.prevent="previousMonth()" x-bind:disabled="isDisabled || isPreviousMonthDisabled()"
-                        class="absolute top-0 {{ $isRtl ? 'end-0 me-auto' : 'start-0 ms-auto' }} z-10 fi-icon-btn fi-icon-btn-color-gray fi-icon-btn-size-sm inline-flex items-center justify-center rounded-lg gap-1.5 p-2 -m-2 text-sm font-medium text-gray-700 outline-none hover:bg-gray-50 focus:bg-gray-50 disabled:pointer-events-none disabled:opacity-70 dark:text-gray-200 dark:hover:bg-white/5 dark:focus:bg-white/5"
-                    >
-                        <x-filament::icon :icon="$prevMonthIcon" class="w-5 h-5 fi-icon-btn-icon" />
-                        <span class="sr-only">
-                            {{ __('filament-forms::components.date_time_picker.buttons.previous_month.label') }}
-                        </span>
-                    </button>
+            {{-- Header: Month/Year and Nav --}}
+            <div class="flex relative justify-between items-center px-1 mb-2">
+                <button 
+                    type="button"
+                    title="{{ __('filament-forms::components.date_time_picker.buttons.previous_month.label') }}"
+                    x-on:click.prevent="previousMonth()" x-bind:disabled="isDisabled || isPreviousMonthDisabled()"
+                    class="absolute top-0 {{ $isRtl ? 'end-0 me-auto' : 'start-0 ms-auto' }} z-10 fi-icon-btn fi-icon-btn-color-gray fi-icon-btn-size-sm inline-flex items-center justify-center rounded-lg gap-1.5 p-2 -m-2 text-sm font-medium text-gray-700 outline-none hover:bg-gray-50 focus:bg-gray-50 disabled:pointer-events-none disabled:opacity-70 dark:text-gray-200 dark:hover:bg-white/5 dark:focus:bg-white/5"
+                >
+                    <x-filament::icon :icon="$prevMonthIcon" class="w-5 h-5 fi-icon-btn-icon" />
+                    <span class="sr-only">
+                        {{ __('filament-forms::components.date_time_picker.buttons.previous_month.label') }}
+                    </span>
+                </button>
 
-                    {{-- Month/Year Display Area --}}
-                    <div class="flex flex-grow justify-around items-center">
-                        {{-- Calendar 1 Header (Month/Year) --}}
-                        <div
-                            class="flex items-center space-x-1 rtl:space-x-reverse {{ $shouldDisplayDualCalendar() ? 'w-1/2' : 'w-full' }} justify-center">
-                            <span x-text="monthNames[currentCalendarMonth1]"
-                                class="text-sm font-semibold text-gray-950 dark:text-white"></span>
-                            <span x-text="currentCalendarYear1"
-                                class="text-sm font-semibold text-gray-950 dark:text-white"></span>
-                        </div>
-
-                        {{-- Calendar 2 Header (Month/Year) --}}
-                        <template x-if="dualCalendar">
-                            <div class="flex justify-center items-center space-x-1 w-1/2 rtl:space-x-reverse">
-                                <span x-text="monthNames[currentCalendarMonth2]"
-                                    class="text-sm font-semibold text-gray-950 dark:text-white"></span>
-                                <span x-text="currentCalendarYear2"
-                                    class="text-sm font-semibold text-gray-950 dark:text-white"></span>
-                            </div>
-                        </template>
+                {{-- Month/Year Display Area --}}
+                <div class="flex flex-grow justify-around items-center">
+                    {{-- Calendar 1 Header (Month/Year) --}}
+                    <div
+                        class="flex items-center space-x-1 rtl:space-x-reverse {{ $shouldDisplayDualCalendar() ? 'w-1/2' : 'w-full' }} justify-center">
+                        <span x-text="monthNames[currentCalendarMonth1]"
+                            class="text-sm font-semibold text-gray-950 dark:text-white"></span>
+                        <span x-text="currentCalendarYear1"
+                            class="text-sm font-semibold text-gray-950 dark:text-white"></span>
                     </div>
 
-                    <button 
-                        type="button"
-                        title="{{ __('filament-forms::components.date_time_picker.buttons.next_month.label') }}"
-                        x-on:click.prevent="nextMonth()" 
-                        x-bind:disabled="isDisabled || isNextMonthDisabled()"
-                        class="absolute top-0 {{ $isRtl ? 'start-0 ms-auto' : 'end-0 me-auto' }} z-10 fi-icon-btn fi-icon-btn-color-gray fi-icon-btn-size-sm inline-flex items-center justify-center rounded-lg gap-1.5 p-2 -m-2 text-sm font-medium text-gray-700 outline-none hover:bg-gray-50 focus:bg-gray-50 disabled:pointer-events-none disabled:opacity-70 dark:text-gray-200 dark:hover:bg-white/5 dark:focus:bg-white/5"
-                    >
-                        <x-filament::icon :icon="$nextMonthIcon" class="w-5 h-5 fi-icon-btn-icon" />
-                        <span class="sr-only">
-                            {{ __('filament-forms::components.date_time_picker.buttons.next_month.label') }}
-                        </span>
-                    </button>
+                    {{-- Calendar 2 Header (Month/Year) --}}
+                    <template x-if="dualCalendar">
+                        <div class="flex justify-center items-center space-x-1 w-1/2 rtl:space-x-reverse">
+                            <span x-text="monthNames[currentCalendarMonth2]"
+                                class="text-sm font-semibold text-gray-950 dark:text-white"></span>
+                            <span x-text="currentCalendarYear2"
+                                class="text-sm font-semibold text-gray-950 dark:text-white"></span>
+                        </div>
+                    </template>
                 </div>
 
-                {{-- Dual Calendar Container --}}
+                <button 
+                    type="button"
+                    title="{{ __('filament-forms::components.date_time_picker.buttons.next_month.label') }}"
+                    x-on:click.prevent="nextMonth()" 
+                    x-bind:disabled="isDisabled || isNextMonthDisabled()"
+                    class="absolute top-0 {{ $isRtl ? 'start-0 ms-auto' : 'end-0 me-auto' }} z-10 fi-icon-btn fi-icon-btn-color-gray fi-icon-btn-size-sm inline-flex items-center justify-center rounded-lg gap-1.5 p-2 -m-2 text-sm font-medium text-gray-700 outline-none hover:bg-gray-50 focus:bg-gray-50 disabled:pointer-events-none disabled:opacity-70 dark:text-gray-200 dark:hover:bg-white/5 dark:focus:bg-white/5"
+                >
+                    <x-filament::icon :icon="$nextMonthIcon" class="w-5 h-5 fi-icon-btn-icon" />
+                    <span class="sr-only">
+                        {{ __('filament-forms::components.date_time_picker.buttons.next_month.label') }}
+                    </span>
+                </button>
+            </div>
+
+            {{-- Presets + Dual Calendar Container --}}
+            <div class="flex space-x-4 rtl:space-x-reverse">
+                {{-- Presets --}}
+                <template x-if="hasPresets">
+                    <div class="w-40 border-r border-gray-200 dark:border-gray-700 pr-4 mr-4">
+                        <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            {{ __('filament-date-range::picker.presets.heading') }}
+                        </h4>
+                        <div class="flex flex-col gap-1">
+                            <template x-for="preset in presets" :key="preset.key">
+                                <button type="button" class="text-left text-xs px-2 py-1 rounded-md transition-colors"
+                                    :class="{
+                                        'bg-primary-600 text-white dark:bg-primary-500': activePreset === preset.key,
+                                        'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5': activePreset !==
+                                            preset.key,
+                                    }"
+                                    x-on:click.prevent="applyPreset(preset.key)">
+                                    <span x-text="preset.label"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Calendars --}}
                 <div class="flex space-x-4 rtl:space-x-reverse">
                     {{-- Calendar 1 --}}
                     <div class="grid gap-y-1">
                         {{-- Day Names --}}
                         <div class="grid grid-cols-7 gap-1">
                             <template x-for="dayName in dayNames" :key="dayName + '_cal1'">
-                                <div x-text="dayName" class="text-center text-sm font-medium text-gray-500 dark:text-gray-400"></div>
+                                <div x-text="dayName"
+                                    class="text-center text-sm font-medium text-gray-500 dark:text-gray-400"></div>
                             </template>
                         </div>
 
@@ -238,10 +309,14 @@
                                     :class="{
                                         'is-disabled': isDayDisabled(day, currentCalendarMonth1, currentCalendarYear1),
                                         'is-selected': isDaySelected(day, currentCalendarMonth1, currentCalendarYear1),
-                                        'rounded-full': isDaySelected(day, currentCalendarMonth1, currentCalendarYear1) && !hasRange(),
-                                        'ltr:rounded-l-full rtl:rounded-r-full': isStartDay(day, currentCalendarMonth1, currentCalendarYear1) && hasRange(),
-                                        'ltr:rounded-r-full rtl:rounded-l-full': isEndDay(day, currentCalendarMonth1, currentCalendarYear1) && hasRange(),
-                                        'is-in-range rounded-none': isInRange(day, currentCalendarMonth1, currentCalendarYear1),
+                                        'rounded-full': isDaySelected(day, currentCalendarMonth1,
+                                            currentCalendarYear1) && !hasRange(),
+                                        'ltr:rounded-l-full rtl:rounded-r-full': isStartDay(day, currentCalendarMonth1,
+                                            currentCalendarYear1) && hasRange(),
+                                        'ltr:rounded-r-full rtl:rounded-l-full': isEndDay(day, currentCalendarMonth1,
+                                            currentCalendarYear1) && hasRange(),
+                                        'is-in-range rounded-none': isInRange(day, currentCalendarMonth1,
+                                            currentCalendarYear1),
                                         'is-today': isToday(day, currentCalendarMonth1, currentCalendarYear1),
                                     }">
                                 </div>
@@ -273,12 +348,18 @@
                                         x-on:mouseenter="previewDay(day, currentCalendarMonth2, currentCalendarYear2)"
                                         class="drp-calendar-day"
                                         :class="{
-                                            'is-disabled': isDayDisabled(day, currentCalendarMonth2, currentCalendarYear2),
-                                            'is-selected': isDaySelected(day, currentCalendarMonth2, currentCalendarYear2),
-                                            'rounded-full': isDaySelected(day, currentCalendarMonth2, currentCalendarYear2) && !hasRange(),
-                                            'ltr:rounded-l-full rtl:rounded-r-full': isStartDay(day, currentCalendarMonth2, currentCalendarYear2) && hasRange(),
-                                            'ltr:rounded-r-full rtl:rounded-l-full': isEndDay(day, currentCalendarMonth2, currentCalendarYear2) && hasRange(),
-                                            'is-in-range rounded-none': isInRange(day, currentCalendarMonth2, currentCalendarYear2),
+                                            'is-disabled': isDayDisabled(day, currentCalendarMonth2,
+                                                currentCalendarYear2),
+                                            'is-selected': isDaySelected(day, currentCalendarMonth2,
+                                                currentCalendarYear2),
+                                            'rounded-full': isDaySelected(day, currentCalendarMonth2,
+                                                currentCalendarYear2) && !hasRange(),
+                                            'ltr:rounded-l-full rtl:rounded-r-full': isStartDay(day,
+                                                currentCalendarMonth2, currentCalendarYear2) && hasRange(),
+                                            'ltr:rounded-r-full rtl:rounded-l-full': isEndDay(day,
+                                                currentCalendarMonth2, currentCalendarYear2) && hasRange(),
+                                            'is-in-range rounded-none': isInRange(day, currentCalendarMonth2,
+                                                currentCalendarYear2),
                                             'is-today': isToday(day, currentCalendarMonth2, currentCalendarYear2),
                                         }">
                                     </div>
@@ -290,24 +371,25 @@
                         </div>
                     </template>
                 </div>
+            </div>
 
-                {{-- Apply/Cancel buttons --}}
-                <template x-if="!autoClose">
-                    <div
-                        class="flex justify-end items-center pt-4 mt-2 space-x-2 border-t border-gray-200 dark:border-gray-700 rtl:space-x-reverse">
-                        {{-- Cancel Button --}}
-                        <button type="button" x-on:click="cancelSelectionAndClose()"
-                            class="inline-flex justify-center items-center text-xs font-medium text-gray-700 outline-none fi-link hover:underline focus:underline dark:text-gray-200 fi-btn-color-gray">
-                            {{ __('filament-date-range::picker.buttons.cancel') }}
-                        </button>
+            {{-- Apply/Cancel buttons --}}
+            <template x-if="!autoClose">
+                <div
+                    class="flex justify-end items-center pt-4 mt-2 space-x-2 border-t border-gray-200 dark:border-gray-700 rtl:space-x-reverse">
+                    {{-- Cancel Button --}}
+                    <button type="button" x-on:click="cancelSelectionAndClose()"
+                        class="inline-flex justify-center items-center text-xs font-medium text-gray-700 outline-none fi-link hover:underline focus:underline dark:text-gray-200 fi-btn-color-gray">
+                        {{ __('filament-date-range::picker.buttons.cancel') }}
+                    </button>
 
-                        {{-- Apply Button --}}
-                        <button type="button" x-on:click="applySelectionAndClose()"
-                            class="inline-flex justify-center items-center text-xs font-medium outline-none fi-link text-(--primary-600) hover:underline focus:underline dark:text-(--primary-500)">
-                            {{ __('filament-date-range::picker.buttons.apply') }}
-                        </button>
-                    </div>
-                </template>
+                    {{-- Apply Button --}}
+                    <button type="button" x-on:click="applySelectionAndClose()"
+                        class="inline-flex justify-center items-center text-xs font-medium outline-none fi-link text-(--primary-600) hover:underline focus:underline dark:text-(--primary-500)">
+                        {{ __('filament-date-range::picker.buttons.apply') }}
+                    </button>
+                </div>
+            </template>
         </div>
     </div>
 </x-dynamic-component>
