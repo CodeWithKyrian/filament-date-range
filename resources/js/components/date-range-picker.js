@@ -18,6 +18,7 @@ dayjs.extend(isSameOrAfter)
 export default function dateRangePickerFormComponent({
 	state,
 	displayFormat = "YYYY-MM-DD",
+	stateFormat = "YYYY-MM-DD",
 	minDate = null,
 	maxDate = null,
 	locale = "en",
@@ -28,6 +29,9 @@ export default function dateRangePickerFormComponent({
 	dualCalendar = true,
 	enabledDates = null,
 	singleField = false,
+	timeEnabled = false,
+	allDayEnabled = false,
+	allDayInference = true,
 	hasPresets = false,
 	presets = [],
 }) {
@@ -38,6 +42,8 @@ export default function dateRangePickerFormComponent({
 		startDisplay: "",
 		endDisplay: "",
 		rangeDisplay: "",
+		startTime: "",
+		endTime: "",
 
 		start: null,
 		end: null,
@@ -70,6 +76,7 @@ export default function dateRangePickerFormComponent({
 		firstDayOfWeek,
 		monthNames: [],
 		dayNames: [],
+		stateFormat,
 
 		autoClose,
 		isReadOnly,
@@ -78,6 +85,11 @@ export default function dateRangePickerFormComponent({
 		enabledDates,
 
 		singleField,
+		timeEnabled,
+		allDayEnabled,
+		allDay: true,
+		allDayInference,
+		hasManualAllDay: false,
 
 		hasPresets,
 		presets,
@@ -94,6 +106,12 @@ export default function dateRangePickerFormComponent({
 			this.start = start;
 			this.end = end;
 
+			if (this.timeEnabled) {
+				this.allDay = this.inferAllDayFromState();
+			} else {
+				this.allDay = true;
+			}
+
 			this.updateDisplayValues();
 			this.setInitialCalendarMonths();
 			this.generateCalendars();
@@ -106,6 +124,9 @@ export default function dateRangePickerFormComponent({
 				) {
 					this.start = newStart;
 					this.end = newEnd;
+					if (this.timeEnabled && this.allDayEnabled && this.allDayInference && !this.hasManualAllDay) {
+						this.allDay = this.inferAllDayFromState();
+					}
 					this.updateDisplayValues();
 					if (this.hasPresets) {
 						this.checkIfMatchesPreset();
@@ -119,6 +140,39 @@ export default function dateRangePickerFormComponent({
 			}
 		},
 
+		parseStateDate(dateValue, shouldEndOfDay = false) {
+			if (!dateValue) return null;
+
+			let parsed = dayjs(dateValue, this.stateFormat, true);
+			if (!parsed.isValid()) {
+				parsed = dayjs(dateValue);
+			}
+
+			if (!parsed.isValid()) {
+				return null;
+			}
+
+			if (this.timeEnabled) {
+				const hasTime = typeof dateValue === 'string' && dateValue.includes(':');
+				if (!hasTime) {
+					parsed = shouldEndOfDay ? parsed.endOf('day') : parsed.startOf('day');
+				}
+			}
+
+			return parsed;
+		},
+
+		inferAllDayFromState() {
+			if (!this.timeEnabled) return true;
+			if (!this.allDayEnabled || !this.allDayInference) return false;
+			if (!this.start && !this.end) return true;
+
+			const startIsAllDay = this.start ? this.start.format('HH:mm') === '00:00' : true;
+			const endIsAllDay = this.end ? this.end.format('HH:mm') === '23:59' : true;
+
+			return startIsAllDay && endIsAllDay;
+		},
+
 		getDatesFromState(currentState = this.state) {
 			if (currentState === undefined || currentState === null) {
 				return [null, null];
@@ -127,8 +181,8 @@ export default function dateRangePickerFormComponent({
 			let start = currentState.start;
 			let end = currentState.end;
 
-			if (start) start = dayjs(start);
-			if (end) end = dayjs(end);
+			if (start) start = this.parseStateDate(start, false);
+			if (end) end = this.parseStateDate(end, true);
 
 			return [
 				start?.isValid() ? start : null,
@@ -138,8 +192,8 @@ export default function dateRangePickerFormComponent({
 
 		updateState() {
 			this.state = {
-				start: this.start?.format("YYYY-MM-DD"),
-				end: this.end?.format("YYYY-MM-DD")
+				start: this.start?.format(this.stateFormat),
+				end: this.end?.format(this.stateFormat)
 			};
 
 			if (this.hasPresets) {
@@ -434,6 +488,16 @@ export default function dateRangePickerFormComponent({
 				}
 			}
 
+			if (this.timeEnabled) {
+				if (this.allDay) {
+					if (this.start) this.start = this.start.startOf('day');
+					if (this.end) this.end = this.end.endOf('day');
+				} else {
+					if (this.start) this.start = this.applyTimeToDate(this.start, this.startTime || '00:00', false);
+					if (this.end) this.end = this.applyTimeToDate(this.end, this.endTime || '23:59', true);
+				}
+			}
+
 			this.updateDisplayValues();
 			this.updateState();
 
@@ -498,6 +562,94 @@ export default function dateRangePickerFormComponent({
 			} else {
 				this.rangeDisplay = "";
 			}
+
+			if (this.timeEnabled) {
+				this.syncTimeInputs();
+			}
+		},
+
+		syncTimeInputs() {
+			this.startTime = this.start ? this.start.format('HH:mm') : '00:00';
+			this.endTime = this.end ? this.end.format('HH:mm') : '23:59';
+		},
+
+		applyTimeToDate(dateValue, timeValue, shouldEndOfDay = false) {
+			if (!dateValue) return null;
+			const timeParts = (timeValue ?? '').split(':');
+			if (timeParts.length < 2) {
+				return shouldEndOfDay ? dateValue.endOf('day') : dateValue.startOf('day');
+			}
+
+			const hours = Number.parseInt(timeParts[0], 10);
+			const minutes = Number.parseInt(timeParts[1], 10);
+
+			if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+				return shouldEndOfDay ? dateValue.endOf('day') : dateValue.startOf('day');
+			}
+
+			return dateValue.hour(hours).minute(minutes).second(shouldEndOfDay ? 59 : 0).millisecond(0);
+		},
+
+		applyAllDayTimes() {
+			if (!this.timeEnabled) return;
+
+			if (this.start) {
+				this.start = this.start.startOf('day');
+			}
+			if (this.end) {
+				this.end = this.end.endOf('day');
+			}
+			this.startTime = '00:00';
+			this.endTime = '23:59';
+		},
+
+		handleAllDayToggle() {
+			if (!this.timeEnabled) return;
+			this.hasManualAllDay = true;
+
+			if (this.allDay) {
+				this.applyAllDayTimes();
+			} else {
+				if (!this.startTime) this.startTime = this.start ? this.start.format('HH:mm') : '00:00';
+				if (!this.endTime) this.endTime = this.end ? this.end.format('HH:mm') : '23:59';
+				if (this.start) {
+					this.start = this.applyTimeToDate(this.start, this.startTime, false);
+				}
+				if (this.end) {
+					this.end = this.applyTimeToDate(this.end, this.endTime, true);
+				}
+			}
+
+			this.updateDisplayValues();
+			this.updateState();
+		},
+
+		handleStartTimeInput(value) {
+			this.startTime = value;
+			this.hasManualAllDay = true;
+			this.allDay = false;
+
+			if (!this.start) {
+				return;
+			}
+
+			this.start = this.applyTimeToDate(this.start, value, false);
+			this.updateDisplayValues();
+			this.updateState();
+		},
+
+		handleEndTimeInput(value) {
+			this.endTime = value;
+			this.hasManualAllDay = true;
+			this.allDay = false;
+
+			if (!this.end) {
+				return;
+			}
+
+			this.end = this.applyTimeToDate(this.end, value, true);
+			this.updateDisplayValues();
+			this.updateState();
 		},
 
 		clearAllDates() {
@@ -505,6 +657,11 @@ export default function dateRangePickerFormComponent({
 			this.end = null;
 			this.hoveredStartDate = null;
 			this.hoveredEndDate = null;
+			if (this.timeEnabled) {
+				this.allDay = this.allDayEnabled && this.allDayInference;
+				this.startTime = '00:00';
+				this.endTime = '23:59';
+			}
 			if (this.hasPresets) {
 				this.activePreset = null;
 			}
@@ -514,6 +671,11 @@ export default function dateRangePickerFormComponent({
 
 		checkIfMatchesPreset() {
 			if (!this.hasPresets || !this.start || !this.end) {
+				this.activePreset = null;
+				return;
+			}
+
+			if (this.timeEnabled && !this.allDay) {
 				this.activePreset = null;
 				return;
 			}
@@ -630,6 +792,10 @@ export default function dateRangePickerFormComponent({
 
 			this.start = startDate;
 			this.end = endDate;
+			if (this.timeEnabled) {
+				this.allDay = true;
+				this.applyAllDayTimes();
+			}
 			this.activePreset = presetKey;
 			this.hoveredStartDate = null;
 			this.hoveredEndDate = null;

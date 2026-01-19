@@ -24,4 +24,10 @@ return [
         'last_year' => 'Année dernière',
         'custom_range' => 'Plage personnalisée',
     ],
+    'time' => [
+        'heading' => 'Heure',
+        'all_day' => 'Toute la journée',
+        'start' => 'Heure de début',
+        'end' => 'Heure de fin',
+    ],
 ];

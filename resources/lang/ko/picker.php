@@ -24,4 +24,10 @@ return [
         'last_year' => '작년',
         'custom_range' => '사용자 지정 범위',
     ],
+    'time' => [
+        'heading' => '시간',
+        'all_day' => '종일',
+        'start' => '시작 시간',
+        'end' => '종료 시간',
+    ],
 ];

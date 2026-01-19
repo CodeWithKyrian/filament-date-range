@@ -24,4 +24,10 @@ return [
         'last_year' => 'Múlt év',
         'custom_range' => 'Egyedi tartomány',
     ],
+    'time' => [
+        'heading' => 'Idő',
+        'all_day' => 'Egész nap',
+        'start' => 'Kezdés ideje',
+        'end' => 'Befejezés ideje',
+    ],
 ];

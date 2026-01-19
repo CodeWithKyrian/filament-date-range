@@ -20,4 +20,10 @@ return [
         'last_year' => 'Pagājušais gads',
         'custom_range' => 'Pielāgots diapazons',
     ],
+    'time' => [
+        'heading' => 'Laiks',
+        'all_day' => 'Visu dienu',
+        'start' => 'Sākuma laiks',
+        'end' => 'Beigu laiks',
+    ],
 ];

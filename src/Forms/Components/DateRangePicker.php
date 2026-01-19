@@ -52,6 +52,12 @@ class DateRangePicker extends Field
 
     protected array|Closure|null $enabledDates = null;
 
+    protected bool|Closure $hasTime = false;
+
+    protected bool|Closure $allDayEnabled = false;
+
+    protected bool|Closure $shouldInferAllDay = true;
+
     /**
      * Presets configuration.
      *
@@ -64,6 +70,10 @@ class DateRangePicker extends Field
     protected string|Closure $defaultFormat = 'Y-m-d';
 
     protected string|Closure $defaultDisplayFormat = 'M j, Y';
+
+    protected string|Closure $defaultFormatWithTime = 'Y-m-d H:i';
+
+    protected string|Closure $defaultDisplayFormatWithTime = 'M j, Y H:i';
 
     protected function setUp(): void
     {
@@ -222,6 +232,21 @@ class DateRangePicker extends Field
         return $this;
     }
 
+    public function withTime(bool|Closure $condition = true): static
+    {
+        $this->hasTime = $condition;
+
+        return $this;
+    }
+
+    public function allDay(bool|Closure $enabled = true, bool|Closure $infer = true): static
+    {
+        $this->allDayEnabled = $enabled;
+        $this->shouldInferAllDay = $infer;
+
+        return $this;
+    }
+
     public function inline(bool|Closure $condition = true): static
     {
         $this->isInline = $condition;
@@ -242,12 +267,18 @@ class DateRangePicker extends Field
 
     public function getFormat(): string
     {
-        return $this->evaluate($this->format) ?? $this->evaluate($this->defaultFormat);
+        return (string) ($this->evaluate($this->format)
+            ?? ($this->hasTime()
+                ? $this->evaluate($this->defaultFormatWithTime)
+                : $this->evaluate($this->defaultFormat)));
     }
 
     public function getDisplayFormat(): string
     {
-        return $this->evaluate($this->displayFormat) ?? $this->evaluate($this->defaultDisplayFormat);
+        return (string) ($this->evaluate($this->displayFormat)
+            ?? ($this->hasTime()
+                ? $this->evaluate($this->defaultDisplayFormatWithTime)
+                : $this->evaluate($this->defaultDisplayFormat)));
     }
 
     protected function getMinDateCarbon(): ?CarbonInterface
@@ -453,6 +484,21 @@ class DateRangePicker extends Field
     public function isSingleField(): bool
     {
         return $this->evaluate($this->singleField);
+    }
+
+    public function hasTime(): bool
+    {
+        return $this->evaluate($this->hasTime);
+    }
+
+    public function isAllDayEnabled(): bool
+    {
+        return $this->evaluate($this->allDayEnabled);
+    }
+
+    public function shouldInferAllDay(): bool
+    {
+        return $this->evaluate($this->shouldInferAllDay);
     }
 
     public function getEnabledDates(): ?array

@@ -24,4 +24,10 @@ return [
         'last_year' => 'Sidste år',
         'custom_range' => 'Tilpasset område',
     ],
+    'time' => [
+        'heading' => 'Tid',
+        'all_day' => 'Hele dagen',
+        'start' => 'Starttid',
+        'end' => 'Sluttid',
+    ],
 ];

@@ -24,4 +24,10 @@ return [
         'last_year' => 'Anno scorso',
         'custom_range' => 'Intervallo personalizzato',
     ],
+    'time' => [
+        'heading' => 'Orario',
+        'all_day' => 'Tutto il giorno',
+        'start' => 'Ora di inizio',
+        'end' => 'Ora di fine',
+    ],
 ];
