@@ -24,4 +24,10 @@ return [
         'last_year' => 'Lansko leto',
         'custom_range' => 'Prilagojen obseg',
     ],
+    'time' => [
+        'heading' => 'Čas',
+        'all_day' => 'Cel dan',
+        'start' => 'Začetni čas',
+        'end' => 'Končni čas',
+    ],
 ];

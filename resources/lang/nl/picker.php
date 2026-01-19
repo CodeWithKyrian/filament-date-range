@@ -24,4 +24,10 @@ return [
         'last_year' => 'Vorig jaar',
         'custom_range' => 'Aangepast bereik',
     ],
+    'time' => [
+        'heading' => 'Tijd',
+        'all_day' => 'Hele dag',
+        'start' => 'Starttijd',
+        'end' => 'Eindtijd',
+    ],
 ];

@@ -24,4 +24,10 @@ return [
         'last_year' => 'Praėję metai',
         'custom_range' => 'Pasirinktinis diapazonas',
     ],
+    'time' => [
+        'heading' => 'Laikas',
+        'all_day' => 'Visa diena',
+        'start' => 'Pradžios laikas',
+        'end' => 'Pabaigos laikas',
+    ],
 ];

@@ -24,4 +24,10 @@ return [
         'last_year' => 'Minulý rok',
         'custom_range' => 'Vlastní rozsah',
     ],
+    'time' => [
+        'heading' => 'Čas',
+        'all_day' => 'Celý den',
+        'start' => 'Čas začátku',
+        'end' => 'Čas konce',
+    ],
 ];

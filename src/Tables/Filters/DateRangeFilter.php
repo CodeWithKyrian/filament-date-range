@@ -37,6 +37,12 @@ class DateRangeFilter extends BaseFilter
 
     protected array | Closure | null $enabledDates = null;
 
+    protected bool | Closure $hasTime = false;
+
+    protected bool | Closure $allDayEnabled = false;
+
+    protected bool | Closure $shouldInferAllDay = true;
+
     protected string | null $startColumn = null;
 
     protected string | null $endColumn = null;
@@ -46,6 +52,10 @@ class DateRangeFilter extends BaseFilter
     protected string|Closure $defaultFormat = 'Y-m-d';
 
     protected string|Closure $defaultDisplayFormat = 'M j, Y';
+
+    protected string|Closure $defaultFormatWithTime = 'Y-m-d H:i';
+
+    protected string|Closure $defaultDisplayFormatWithTime = 'M j, Y H:i';
     protected function setUp(): void
     {
         parent::setUp();
@@ -98,6 +108,8 @@ class DateRangeFilter extends BaseFilter
                 ->dualCalendar(fn(): bool => $this->shouldDisplayDualCalendar())
                 ->inline(fn(): bool => $this->isInline())
                 ->enabledDates(fn(): ?array => $this->getEnabledDates())
+                ->withTime(fn(): bool => $this->hasTime())
+                ->allDay(fn(): bool => $this->isAllDayEnabled(), fn(): bool => $this->shouldInferAllDay())
         ]);
     }
 
@@ -112,8 +124,13 @@ class DateRangeFilter extends BaseFilter
             return $query;
         }
 
-        $start = $start ? Carbon::parse($start)->setTimezone($this->getTimezone())->startOfDay() : null;
-        $end = $end ? Carbon::parse($end)->setTimezone($this->getTimezone())->endOfDay() : null;
+        if ($this->hasTime()) {
+            $start = $start ? Carbon::parse($start)->setTimezone($this->getTimezone()) : null;
+            $end = $end ? Carbon::parse($end)->setTimezone($this->getTimezone()) : null;
+        } else {
+            $start = $start ? Carbon::parse($start)->setTimezone($this->getTimezone())->startOfDay() : null;
+            $end = $end ? Carbon::parse($end)->setTimezone($this->getTimezone())->endOfDay() : null;
+        }
 
         $column = $this->getFilterColumnName();
 
@@ -228,6 +245,19 @@ class DateRangeFilter extends BaseFilter
         return $this;
     }
 
+    public function withTime(bool | Closure $condition = true): static
+    {
+        $this->hasTime = $condition;
+        return $this;
+    }
+
+    public function allDay(bool | Closure $enabled = true, bool | Closure $infer = true): static
+    {
+        $this->allDayEnabled = $enabled;
+        $this->shouldInferAllDay = $infer;
+        return $this;
+    }
+
     public function hiddenLabel(bool | Closure $condition = true): static
     {
         $this->isLabelHidden = $condition;
@@ -236,12 +266,18 @@ class DateRangeFilter extends BaseFilter
 
     public function getDisplayFormat(): string
     {
-        return $this->evaluate($this->displayFormat) ?? $this->evaluate($this->defaultDisplayFormat);
+        return (string) ($this->evaluate($this->displayFormat)
+            ?? ($this->hasTime()
+                ? $this->evaluate($this->defaultDisplayFormatWithTime)
+                : $this->evaluate($this->defaultDisplayFormat)));
     }
 
     public function getFormat(): string
     {
-        return $this->evaluate($this->format) ?? $this->evaluate($this->defaultFormat);
+        return (string) ($this->evaluate($this->format)
+            ?? ($this->hasTime()
+                ? $this->evaluate($this->defaultFormatWithTime)
+                : $this->evaluate($this->defaultFormat)));
     }
 
     public function getMinDate(): CarbonInterface | string | Closure | null
@@ -297,6 +333,21 @@ class DateRangeFilter extends BaseFilter
     public function isInline(): bool
     {
         return $this->evaluate($this->isInline);
+    }
+
+    public function hasTime(): bool
+    {
+        return $this->evaluate($this->hasTime);
+    }
+
+    public function isAllDayEnabled(): bool
+    {
+        return $this->evaluate($this->allDayEnabled);
+    }
+
+    public function shouldInferAllDay(): bool
+    {
+        return $this->evaluate($this->shouldInferAllDay);
     }
 
     public function getEnabledDates(): ?array

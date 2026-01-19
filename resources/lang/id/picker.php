@@ -24,4 +24,10 @@ return [
         'last_year' => 'Tahun Lalu',
         'custom_range' => 'Rentang Kustom',
     ],
+    'time' => [
+        'heading' => 'Waktu',
+        'all_day' => 'Sepanjang hari',
+        'start' => 'Waktu mulai',
+        'end' => 'Waktu selesai',
+    ],
 ];

@@ -24,4 +24,10 @@ return [
         'last_year' => '去年',
         'custom_range' => '自訂範圍',
     ],
+    'time' => [
+        'heading' => '時間',
+        'all_day' => '全天',
+        'start' => '開始時間',
+        'end' => '結束時間',
+    ],
 ];

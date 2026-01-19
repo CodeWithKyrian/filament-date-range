@@ -24,4 +24,10 @@ return [
         'last_year' => 'Poprzedni rok',
         'custom_range' => 'Niestandardowy zakres',
     ],
+    'time' => [
+        'heading' => 'Czas',
+        'all_day' => 'Cały dzień',
+        'start' => 'Godzina rozpoczęcia',
+        'end' => 'Godzina zakończenia',
+    ],
 ];

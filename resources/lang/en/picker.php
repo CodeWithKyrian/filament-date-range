@@ -24,4 +24,10 @@ return [
         'last_year' => 'Last Year',
         'custom_range' => 'Custom range',
     ],
+    'time' => [
+        'heading' => 'Time',
+        'all_day' => 'All day',
+        'start' => 'Start time',
+        'end' => 'End time',
+    ],
 ];

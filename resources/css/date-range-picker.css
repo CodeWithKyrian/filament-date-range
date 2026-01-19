@@ -49,11 +49,15 @@
         }
 
         &.focused:not(.is-selected):not(.is-disabled) {
-            @apply bg-gray-100 dark:bg-white/10;
+            @apply bg-(--gray-100) dark:bg-white/10;
         }
 
         &:not(.is-disabled):not(.is-selected):not(.is-in-range) {
-            @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+            @apply hover:bg-(--gray-100) dark:hover:bg-(--gray-700);
         }
+    }
+
+    & .fi-date-range-time-label {
+        @apply text-xs font-medium text-(--gray-500) dark:text-(--gray-400);
     }
 }

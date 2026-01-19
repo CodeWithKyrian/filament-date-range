@@ -16,6 +16,7 @@ It has a remarkably small footprint (JS ~105KB, gzipped ~26.2KB), ensuring your 
 *   **Powerful Table Filter:** Seamlessly filter your table records by date ranges.
 *   **Quick Preset Ranges:** Optional sidebar with common ranges like Today, Yesterday, Last 7 Days, This Month, etc.
 *   **Single Field Mode:** Optionally render a single input that displays the full date range (e.g. for compact table filters).
+*   **Time Range Support:** Optional time selection with an all-day toggle that defaults to start/end of day.
 *   **Lightweight & Performant:** Pure AlpineJS implementation with a minimal asset footprint.
 *   **Highly Customizable:** Extensive API for tailoring appearance, behavior, date formats, locales, and more.
 *   **RTL Support:** Automatically adjusts for right-to-left languages.
@@ -244,6 +245,30 @@ DateRangePicker::make('work_schedule')
     ->weekStartsOnSunday()
 ```
 
+#### `withTime(bool | Closure $condition = true)`
+
+Enables time selection alongside the date range. When enabled, the picker defaults to **start of day** for the start date and **end of day** for the end date.
+
+```php
+DateRangePicker::make('maintenance_window')
+    ->withTime()
+    ->helperText('Defaults to all-day; toggle off to pick specific times.');
+```
+
+![Time-enabled date range picker with time inputs.](art/form-field-time-range.png)
+
+#### `allDay(bool | Closure $enabled = true, bool | Closure $infer = true)`
+
+Enables all-day functionality when time selection is enabled. When `$enabled` is `true`, the all-day toggle is shown. When `$infer` is `true`, the component infers the all-day state from values (including defaults), turning the toggle on when the start time is at the start of day and the end time is at the end of day.
+
+```php
+DateRangePicker::make('maintenance_window')
+    ->withTime()
+    ->allDay(true, true);
+```
+
+![Time-enabled date range picker showing the all-day toggle.](art/form-field-time-range-toggle.png)
+
 #### `startPlaceholder(string | Closure | null $placeholder)`
 
 Sets the placeholder text for the "Start" date input field. Defaults to a localized "Start Date".
@@ -280,7 +305,7 @@ DateRangePicker::make('project_duration')
 
 #### `autoClose(bool | Closure $condition = true)`
 
-If `true` (default), the calendar popover will close immediately after a valid date range (both start and end dates) is selected. If `false`, "Apply" and "Cancel" buttons are shown in the popover, requiring an explicit click to confirm the selection and close.
+If `true` (default), the calendar popover will close immediately after a valid date range (both start and end dates) is selected. If `false`, "Apply" and "Cancel" buttons are shown in the popover, requiring an explicit click to confirm the selection and close. When `withTime()` is enabled, auto-close is disabled automatically so users can adjust times before applying.
 ```php
 DateRangePicker::make('conference_dates')
     ->autoClose(true)
@@ -435,6 +460,10 @@ The `DateRangeFilter` mirrors many of the customization methods available on the
 -   `dualCalendar(bool | Closure $condition = true)`
 -   `inline(bool | Closure $condition = true)`: Controls whether the start and end inputs are displayed horizontally (default) or vertically
 -   `stacked(bool | Closure $condition = true)`: Convenience method to set vertical layout, equivalent to `->inline(false)`
+-   `withTime(bool | Closure $condition = true)`: Enable time selection in the filter
+-   `allDay(bool | Closure $enabled = true, bool | Closure $infer = true)`: Show all-day toggle and infer all-day state
+-   `showAllDayToggle(bool | Closure $condition = true)`: Show/hide the all-day toggle when time is enabled
+-   `defaultAllDay(bool | Closure $condition = true)`: Default the all-day toggle to on/off
 
 Example:
 ```php
@@ -446,7 +475,7 @@ DateRangeFilter::make('processed_at')
 
 ### Query Application
 
-The filter, by default, applies a `WHERE column >= start_date AND column <= end_date` condition to your Eloquent query. The `start_date` is taken as the start of the selected day, and `end_date` as the end of the selected day, respecting the configured timezone.
+The filter, by default, applies a `WHERE column >= start_date AND column <= end_date` condition to your Eloquent query. When time selection is disabled, the `start_date` is taken as the start of the selected day and `end_date` as the end of the selected day. When time selection is enabled, the exact timestamps selected in the picker are used, respecting the configured timezone.
 
 #### `modifyQueryUsing(Closure $callback)`
 

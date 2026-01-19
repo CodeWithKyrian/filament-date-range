@@ -24,4 +24,10 @@ return [
         'last_year' => 'Năm trước',
         'custom_range' => 'Phạm vi tùy chỉnh',
     ],
+    'time' => [
+        'heading' => 'Thời gian',
+        'all_day' => 'Cả ngày',
+        'start' => 'Thời gian bắt đầu',
+        'end' => 'Thời gian kết thúc',
+    ],
 ];

@@ -24,4 +24,10 @@ return [
         'last_year' => 'Letztes Jahr',
         'custom_range' => 'Benutzerdefinierter Bereich',
     ],
+    'time' => [
+        'heading' => 'Zeit',
+        'all_day' => 'Ganztägig',
+        'start' => 'Startzeit',
+        'end' => 'Endzeit',
+    ],
 ];

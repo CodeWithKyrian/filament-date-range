@@ -24,4 +24,10 @@ return [
         'last_year' => 'O\'tgan yil',
         'custom_range' => 'Maxsus diapazon',
     ],
+    'time' => [
+        'heading' => 'Vaqt',
+        'all_day' => 'Butun kun',
+        'start' => 'Boshlanish vaqti',
+        'end' => 'Tugash vaqti',
+    ],
 ];

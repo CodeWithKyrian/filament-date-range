@@ -24,4 +24,10 @@ return [
         'last_year' => 'Geçen Yıl',
         'custom_range' => 'Özel Aralık',
     ],
+    'time' => [
+        'heading' => 'Saat',
+        'all_day' => 'Tüm gün',
+        'start' => 'Başlangıç saati',
+        'end' => 'Bitiş saati',
+    ],
 ];
