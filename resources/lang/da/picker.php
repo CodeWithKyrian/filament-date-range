@@ -30,4 +30,7 @@ return [
         'start' => 'Starttid',
         'end' => 'Sluttid',
     ],
+    'validation' => [
+        'both_required' => ':label kræver både start- og slutdato.',
+    ],
 ];

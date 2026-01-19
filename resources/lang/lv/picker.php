@@ -26,4 +26,7 @@ return [
         'start' => 'Sākuma laiks',
         'end' => 'Beigu laiks',
     ],
+    'validation' => [
+        'both_required' => ':label nepieciešami sākuma un beigu datumi.',
+    ],
 ];

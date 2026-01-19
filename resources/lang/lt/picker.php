@@ -30,4 +30,7 @@ return [
         'start' => 'Pradžios laikas',
         'end' => 'Pabaigos laikas',
     ],
+    'validation' => [
+        'both_required' => ':label reikalauja pradžios ir pabaigos datų.',
+    ],
 ];

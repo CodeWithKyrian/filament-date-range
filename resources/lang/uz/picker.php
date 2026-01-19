@@ -30,4 +30,7 @@ return [
         'start' => 'Boshlanish vaqti',
         'end' => 'Tugash vaqti',
     ],
+    'validation' => [
+        'both_required' => ':label uchun boshlanish va tugash sanalari kerak.',
+    ],
 ];

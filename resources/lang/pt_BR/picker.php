@@ -30,4 +30,7 @@ return [
         'start' => 'Horário de início',
         'end' => 'Horário de término',
     ],
+    'validation' => [
+        'both_required' => ':label requer data de início e data de término.',
+    ],
 ];

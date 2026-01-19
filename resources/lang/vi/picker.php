@@ -30,4 +30,7 @@ return [
         'start' => 'Thời gian bắt đầu',
         'end' => 'Thời gian kết thúc',
     ],
+    'validation' => [
+        'both_required' => ':label cần ngày bắt đầu và ngày kết thúc.',
+    ],
 ];
