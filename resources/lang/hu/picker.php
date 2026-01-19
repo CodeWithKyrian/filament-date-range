@@ -30,4 +30,7 @@ return [
         'start' => 'Kezdés ideje',
         'end' => 'Befejezés ideje',
     ],
+    'validation' => [
+        'both_required' => ':label mezőhöz kezdő és záró dátum szükséges.',
+    ],
 ];

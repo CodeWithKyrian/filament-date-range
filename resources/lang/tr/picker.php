@@ -30,4 +30,7 @@ return [
         'start' => 'Başlangıç saati',
         'end' => 'Bitiş saati',
     ],
+    'validation' => [
+        'both_required' => ':label başlangıç ve bitiş tarihlerini gerektirir.',
+    ],
 ];

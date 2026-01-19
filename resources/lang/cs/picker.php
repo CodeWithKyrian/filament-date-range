@@ -30,4 +30,7 @@ return [
         'start' => 'Čas začátku',
         'end' => 'Čas konce',
     ],
+    'validation' => [
+        'both_required' => ':label vyžaduje datum začátku i konce.',
+    ],
 ];

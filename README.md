@@ -386,6 +386,10 @@ Makes the input fields read-only, preventing direct text input (selection via ca
 
 Disables the entire component, preventing any interaction.
 
+#### `required(bool | Closure $condition = true)`
+
+When required, both the start and end dates must be filled. If only one side is selected, validation will fail for the missing side.
+
 #### Affixes (Prefixes & Suffixes)
 
 You can add icons, labels, or actions as prefixes or suffixes to both the "Start" and "End" input fields individually, similar to how the inbuilt Filament fields work.

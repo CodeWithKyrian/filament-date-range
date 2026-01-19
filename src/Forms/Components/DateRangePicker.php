@@ -527,4 +527,38 @@ class DateRangePicker extends Field
 
         return empty($formattedDates) ? null : $formattedDates;
     }
+
+    public function dehydrateValidationRules(array &$rules): void
+    {
+        parent::dehydrateValidationRules($rules);
+
+        $statePath = $this->getStatePath();
+
+        if (! $this->isRequired()) {
+            return;
+        }
+
+        $label = $this->getLabel();
+
+        $rules[$statePath] = [
+            ...$rules[$statePath] ?? [],
+            static function (string $attribute, mixed $value, Closure $fail) use ($label): void {
+                $message = __('filament-date-range::picker.validation.both_required', [
+                    'label' => $label,
+                ]);
+
+                if (! is_array($value)) {
+                    $fail($message);
+                    return;
+                }
+
+                $start = $value['start'] ?? null;
+                $end = $value['end'] ?? null;
+
+                if (blank($start) || blank($end)) {
+                    $fail($message);
+                }
+            },
+        ];
+    }
 }
