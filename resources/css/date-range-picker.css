@@ -25,39 +25,252 @@
 }
 
 .fi-date-range-picker {
-    & .drp-calendar-day {
-        @apply p-1.5 text-xs transition duration-75 flex items-center justify-center leading-none;
+    & .fi-date-range-picker-input-container {
+        @apply flex;
 
-        &.is-disabled {
-            @apply pointer-events-none opacity-50 cursor-not-allowed;
+        &.is-inline {
+            @apply items-center gap-3;
         }
 
-        &:not(.is-disabled) {
-            @apply cursor-pointer;
+        &.is-stacked {
+            @apply flex-col gap-2;
         }
 
-        &.is-selected {
-            @apply text-white bg-(--primary-600) dark:bg-(--primary-400);
+        & .fi-fo-date-range-picker-single-wrapper {
+            @apply relative w-full;
         }
 
-        &.is-in-range {
-            @apply text-(--primary-700) bg-(--primary-100) dark:text-(--primary-300) dark:bg-(--primary-700)/30;
+        & .fi-fo-date-range-picker-start-wrapper {
+            @apply relative;
         }
 
-        &.is-today:not(.is-in-range):not(.is-selected) {
-            @apply font-semibold text-(--primary-600) dark:text-(--primary-400);
+        & .fi-fo-date-range-picker-end-wrapper {
+            @apply relative;
         }
 
-        &.focused:not(.is-selected):not(.is-disabled) {
-            @apply bg-(--gray-100) dark:bg-white/10;
+        & .fi-date-range-picker-field {
+            @apply min-w-0;
         }
 
-        &:not(.is-disabled):not(.is-selected):not(.is-in-range) {
-            @apply hover:bg-(--gray-100) dark:hover:bg-(--gray-700);
+        &.is-inline .fi-date-range-picker-field {
+            @apply flex-1;
+        }
+
+        &.is-stacked .fi-date-range-picker-field {
+            @apply w-full;
+        }
+
+        & .fi-date-range-picker-input-inner {
+            @apply relative grow;
         }
     }
 
-    & .fi-date-range-time-label {
-        @apply text-xs font-medium text-(--gray-500) dark:text-(--gray-400);
+    & .fi-date-range-picker-input {
+        @apply w-full border-none bg-transparent px-3 py-1.5 text-sm leading-6 text-(--gray-950) outline-hidden transition duration-75 placeholder:text-(--gray-400) focus:ring-0 disabled:text-(--gray-500) disabled:[-webkit-text-fill-color:var(--color-gray-500)] dark:text-white dark:placeholder:text-(--gray-500) dark:disabled:text-(--gray-400) dark:disabled:[-webkit-text-fill-color:var(--color-gray-400)];
+        
+        &.is-active {
+            @apply font-semibold;
+        }
+    }
+
+    & .fi-date-range-picker-clear-button {
+        @apply absolute top-1/2 -translate-y-1/2 appearance-none text-(--gray-400) hover:text-(--gray-500) dark:text-(--gray-500) dark:hover:text-(--gray-400);
+        inset-inline-end: 0.625rem;
+        
+        & .fi-date-range-picker-clear-icon {
+            @apply h-5 w-5;
+        }
+    }
+
+    & .fi-date-range-picker-separator {
+        @apply inline-flex text-sm text-(--gray-500) dark:text-(--gray-400);
+        
+        &.is-inline {
+            @apply shrink-0;
+        }
+
+        &.is-stacked {
+            @apply justify-center;
+        }
+    }
+
+    & .fi-date-range-picker-panel {
+        @apply absolute z-10 space-y-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black/5 dark:bg-(--gray-900) dark:ring-white/10;
+        
+        &.is-dual {
+            @apply min-w-96;
+        }
+
+        &.is-single {
+            @apply min-w-56;
+        }
+
+        & .fi-date-range-picker-panel-header {
+            @apply relative flex items-center justify-between px-1 mb-2;
+
+            & .fi-date-range-picker-nav-button {
+                @apply absolute top-0 z-10 inline-flex items-center justify-center rounded-lg gap-1.5 p-2 -m-2 text-sm font-medium text-(--gray-700) outline-none hover:bg-(--gray-50) focus:bg-(--gray-50) disabled:pointer-events-none disabled:opacity-70 dark:text-(--gray-200) dark:hover:bg-white/5 dark:focus:bg-white/5;
+                
+                &.is-prev {
+                    inset-inline-start: 0;
+                }
+
+                &.is-next {
+                    inset-inline-end: 0;
+                }
+
+                & .fi-date-range-picker-nav-icon {
+                    @apply h-5 w-5;
+                }
+            }
+
+            & .fi-date-range-picker-months {
+                @apply flex flex-grow items-center justify-around;
+            }
+
+            & .fi-date-range-picker-month {
+                @apply flex items-center justify-center space-x-1 rtl:space-x-reverse;
+                
+                &.is-dual {
+                    @apply w-1/2;
+                }
+
+                &.is-single {
+                    @apply w-full;
+                }
+
+                & > span {
+                    @apply text-sm font-semibold text-(--gray-950) dark:text-white;
+                }
+            }
+        }
+
+        & .fi-date-range-picker-panel-body {
+            @apply flex space-x-4 rtl:space-x-reverse;
+
+            & .fi-date-range-picker-presets {
+                @apply w-40 border-(--gray-200) dark:border-(--gray-700);
+                border-inline-end-width: 1px;
+                margin-inline-end: 1rem;
+                padding-inline-end: 1rem;
+
+                & .fi-date-range-picker-presets-heading {
+                    @apply mb-2 text-xs font-semibold uppercase text-(--gray-500) dark:text-(--gray-400);
+                    letter-spacing: 0.025em;
+                }
+
+                & .fi-date-range-picker-presets-list {
+                    @apply flex flex-col gap-1;
+                }
+
+                & .fi-date-range-picker-preset {
+                    @apply text-left text-xs px-2 py-1 rounded-md transition-colors;
+
+                    &.is-active {
+                        @apply bg-(--primary-600) text-white dark:bg-(--primary-500);
+                    }
+
+                    &.is-inactive {
+                        @apply text-(--gray-700) hover:bg-(--gray-100) dark:text-(--gray-200) dark:hover:bg-white/5;
+                    }
+                }
+            }
+
+            & .fi-date-range-picker-calendars {
+                @apply flex space-x-4 rtl:space-x-reverse;
+            }
+
+            & .fi-date-range-picker-calendar {
+                @apply grid gap-y-1;
+            }
+
+            & .fi-date-range-picker-calendar-header {
+                @apply grid grid-cols-7 gap-1;
+                
+                & .fi-date-range-picker-calendar-header-day {
+                    @apply text-center text-sm font-medium text-(--gray-500) dark:text-(--gray-400);
+                }
+            }
+
+            & .fi-date-range-picker-calendar-grid {
+                @apply grid grid-cols-7 gap-y-0.5;
+            }
+
+            & .fi-date-range-picker-calendar-day {
+                @apply p-1.5 text-xs transition duration-75 flex items-center justify-center leading-none;
+
+                &.is-disabled {
+                    @apply pointer-events-none opacity-50 cursor-not-allowed;
+                }
+
+                &:not(.is-disabled) {
+                    @apply cursor-pointer;
+                }
+
+                &.is-selected {
+                    @apply text-white bg-(--primary-600) dark:bg-(--primary-400);
+                }
+
+                &.is-in-range {
+                    @apply text-(--primary-700) bg-(--primary-100) dark:text-(--primary-300) dark:bg-(--primary-700)/30;
+                }
+
+                &.is-today:not(.is-in-range):not(.is-selected) {
+                    @apply font-semibold text-(--primary-600) dark:text-(--primary-400);
+                }
+
+                &.focused:not(.is-selected):not(.is-disabled) {
+                    @apply bg-(--gray-100) dark:bg-white/10;
+                }
+
+                &:not(.is-disabled):not(.is-selected):not(.is-in-range) {
+                    @apply hover:bg-(--gray-100) dark:hover:bg-(--gray-700);
+                }
+            }
+        }
+    }
+
+    & .fi-date-range-picker-time {
+        @apply mt-3 pt-3 border-t border-(--gray-200) dark:border-(--gray-700);
+
+        & .fi-date-range-picker-all-day {
+            @apply flex items-center justify-between;
+        }
+
+        & .fi-date-range-picker-all-day-label {
+            @apply text-xs font-medium text-(--gray-500) dark:text-(--gray-400);
+        }
+
+        & .fi-date-range-picker-time-grid {
+            @apply mt-2 grid grid-cols-2 gap-3;
+        }
+
+        & .fi-date-range-picker-time-field {
+            @apply grid gap-1;
+        }
+
+        & .fi-date-range-picker-time-input {
+            @apply w-full;
+        }
+
+        & .fi-date-range-time-label {
+            @apply text-xs font-medium text-(--gray-500) dark:text-(--gray-400);
+        }
+    }
+
+    & .fi-date-range-picker-footer {
+        @apply flex items-center justify-end pt-4 mt-2 space-x-2 border-t border-(--gray-200) dark:border-(--gray-700) rtl:space-x-reverse;
+        
+        & .fi-date-range-picker-footer-action {
+            @apply inline-flex items-center justify-center text-xs font-medium outline-none;
+        }
+
+        & .fi-date-range-picker-cancel-button {
+            @apply text-(--gray-700) hover:underline focus:underline dark:text-(--gray-200);
+        }
+
+        & .fi-date-range-picker-apply-button {
+            @apply text-(--primary-600) hover:underline focus:underline dark:text-(--primary-500);
+        }
     }
 }
