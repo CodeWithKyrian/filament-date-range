@@ -351,7 +351,7 @@
                 <div class="fi-date-range-picker-footer">
                     {{-- Cancel Button --}}
                     <button type="button" x-on:click="cancelSelectionAndClose()"
-                        class="fi-date-range-picker-footer-action fi-date-range-picker-cancel-button fi-link fi-btn-color-gray">
+                        class="fi-date-range-picker-footer-action fi-date-range-picker-cancel-button fi-link">
                         {{ __('filament-date-range::picker.buttons.cancel') }}
                     </button>
 
