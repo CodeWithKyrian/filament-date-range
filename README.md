@@ -29,6 +29,7 @@ It has a remarkably small footprint (JS ~105KB, gzipped ~26.2KB), ensuring your 
 | :--- | :--- |
 | 3.x | 1.x |
 | 4.x | 2.x |
+| 5.x | 2.1+ |
 
 ## Installation
 
