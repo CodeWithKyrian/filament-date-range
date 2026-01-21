@@ -48,7 +48,9 @@ class DateRangePicker extends Field
 
     protected bool|Closure $singleField = false;
 
-    protected bool|Closure $isInline = true;
+    protected array|bool|Closure|null $stacked = null;
+
+    protected string|Htmlable|array|Closure|null $separatorContent = null;
 
     protected array|Closure|null $enabledDates = null;
 
@@ -79,7 +81,7 @@ class DateRangePicker extends Field
     {
         parent::setUp();
 
-        $this->inline(true);
+        $this->stacked(false);
 
         $this->separator('to');
     }
@@ -167,17 +169,25 @@ class DateRangePicker extends Field
         return $this;
     }
 
-    public function separator(string|Htmlable|Closure|null $separator = 'to'): static
+    public function separator(string|Htmlable|array|Closure|null $separator = 'to'): static
     {
-        $this->separator = $separator;
+        $this->separatorContent = $separator;
         return $this;
     }
 
-    public function separatorIcon(string|BackedEnum|bool|null $icon = null): static
+    public function separatorIcon(string|BackedEnum|array|bool|null $icon = null): static
     {
-        $this->separator(static function () use ($icon) {
-            $icon = $icon instanceof BackedEnum ? $icon->value : $icon;
-            return new HtmlString(Blade::render('<x-filament::icon icon="' . $icon . '" class="w-5 h-5" />'));
+        if (is_array($icon)) {
+            $this->separator([
+                'stacked' => $this->resolveSeparatorIcon($icon['stacked'] ?? null),
+                'inline' => $this->resolveSeparatorIcon($icon['inline'] ?? null),
+            ]);
+
+            return $this;
+        }
+
+        $this->separator(function () use ($icon) {
+            return $this->resolveSeparatorIcon($icon);
         });
 
         return $this;
@@ -247,15 +257,31 @@ class DateRangePicker extends Field
         return $this;
     }
 
-    public function inline(bool|Closure $condition = true): static
+    public function inline(array|bool|Closure $condition = true): static
     {
-        $this->isInline = $condition;
+        if ($condition instanceof Closure) {
+            $this->stacked = function () use ($condition): array|bool|null {
+                $value = $this->evaluate($condition);
+
+                if (! is_array($value) && ! is_bool($value) && $value !== null) {
+                    $value = null;
+                }
+
+                return $this->invertInlineValue($value);
+            };
+
+            return $this;
+        }
+
+        $this->stacked = $this->invertInlineValue($condition);
+
         return $this;
     }
 
-    public function stacked(bool|Closure $condition = true): static
+    public function stacked(array|bool|Closure $condition = true): static
     {
-        $this->isInline = !$condition;
+        $this->stacked = $condition;
+
         return $this;
     }
 
@@ -344,9 +370,34 @@ class DateRangePicker extends Field
         return $this->evaluate($this->firstDayOfWeek);
     }
 
-    public function getSeparatorHtml(): string|Htmlable|null
+    public function getSeparatorHtml(): string|Htmlable|array|null
     {
-        return $this->evaluate($this->separator);
+        $separator = $this->evaluate($this->separatorContent);
+
+        if (! is_array($separator)) {
+            return $separator;
+        }
+
+        $stacked = $separator['stacked'] ?? $separator['inline'] ?? null;
+        $inline = $separator['inline'] ?? $separator['stacked'] ?? null;
+
+        return [
+            'stacked' => $stacked,
+            'inline' => $inline,
+        ];
+    }
+
+    protected function resolveSeparatorIcon(string|BackedEnum|bool|null $icon): ?Htmlable
+    {
+        if ($icon instanceof BackedEnum) {
+            $icon = $icon->value;
+        }
+
+        if (! is_string($icon) || $icon === '') {
+            return null;
+        }
+
+        return new HtmlString(Blade::render('<x-filament::icon icon="' . $icon . '" class="w-5 h-5" />'));
     }
 
     public function shouldShowPresets(): bool
@@ -478,7 +529,91 @@ class DateRangePicker extends Field
 
     public function isInline(): bool
     {
-        return $this->evaluate($this->isInline);
+        $config = $this->getStackedConfig();
+
+        return ! ($config['default'] ?? false);
+    }
+
+    public function getStackedClasses(): string
+    {
+        $config = $this->getStackedConfig();
+        $classes = [];
+
+        foreach (['default', 'sm', 'md', 'lg', 'xl', '2xl'] as $breakpoint) {
+            $isStacked = $config[$breakpoint] ?? null;
+
+            if ($isStacked === null) {
+                continue;
+            }
+
+            $prefix = $breakpoint === 'default' ? 'default:' : "{$breakpoint}:";
+            $classes[] = $prefix . ($isStacked ? 'stacked' : 'inline');
+        }
+
+        return implode(' ', $classes);
+    }
+
+    public function getStackedConfig(): array
+    {
+        $stacked = $this->evaluate($this->stacked);
+
+        $defaults = [
+            'default' => true,
+            'sm' => null,
+            'md' => null,
+            'lg' => null,
+            'xl' => null,
+            '2xl' => null,
+        ];
+
+        if ($stacked === null) {
+            return $defaults;
+        }
+
+        if (is_bool($stacked)) {
+            return [
+                'default' => $stacked,
+                'sm' => $stacked,
+                'md' => $stacked,
+                'lg' => $stacked,
+                'xl' => $stacked,
+                '2xl' => $stacked,
+            ];
+        }
+
+        if (is_array($stacked)) {
+            return array_merge($defaults, $stacked);
+        }
+
+        return $defaults;
+    }
+
+    protected function invertInlineValue(array|bool|null $inline): array|bool|null
+    {
+        if ($inline === null) {
+            return null;
+        }
+
+        if (is_bool($inline)) {
+            $isStacked = ! $inline;
+
+            return [
+                'default' => $isStacked,
+                'sm' => $isStacked,
+                'md' => $isStacked,
+                'lg' => $isStacked,
+                'xl' => $isStacked,
+                '2xl' => $isStacked,
+            ];
+        }
+
+        $inverted = [];
+
+        foreach ($inline as $breakpoint => $value) {
+            $inverted[$breakpoint] = is_bool($value) ? ! $value : $value;
+        }
+
+        return $inverted;
     }
 
     public function isSingleField(): bool
