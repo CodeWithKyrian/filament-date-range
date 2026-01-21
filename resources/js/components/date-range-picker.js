@@ -23,7 +23,8 @@ export default function dateRangePickerFormComponent({
 	maxDate = null,
 	locale = "en",
 	firstDayOfWeek = 0,
-	autoClose = false,
+	autoApply = true,
+	shouldCloseOnSelect = true,
 	isReadOnly = false,
 	isDisabled = false,
 	dualCalendar = true,
@@ -78,7 +79,8 @@ export default function dateRangePickerFormComponent({
 		dayNames: [],
 		stateFormat,
 
-		autoClose,
+		autoApply,
+		shouldCloseOnSelect,
 		isReadOnly,
 		isDisabled,
 		dualCalendar,
@@ -230,7 +232,7 @@ export default function dateRangePickerFormComponent({
 				this.activePreset = null;
 			}
 
-			if (!this.autoClose) {
+			if (!this.autoApply) {
 				this.originalStart = this.start ? this.start.clone() : null;
 				this.originalEnd = this.end ? this.end.clone() : null;
 			}
@@ -329,12 +331,21 @@ export default function dateRangePickerFormComponent({
 			this.hoveredStartDate = null;
 			this.hoveredEndDate = null;
 
-			if (!this.autoClose) {
+			if (!this.autoApply) {
 				this.revertToOriginalDates();
 			}
 
 			this.$refs.panel.toggle(this.$refs.inputContainer);
 			this.isAwaitingEndDate = false;
+		},
+
+		handleDismiss() {
+			if (this.autoApply) {
+				this.applySelectionAndClose();
+				return;
+			}
+
+			this.cancelSelectionAndClose();
 		},
 
 		revertToOriginalDates() {
@@ -501,7 +512,7 @@ export default function dateRangePickerFormComponent({
 			this.updateDisplayValues();
 			this.updateState();
 
-			if (rangeCompleted && this.autoClose) {
+			if (rangeCompleted && this.autoApply && this.shouldCloseOnSelect) {
 				this.applySelectionAndClose();
 			} else if (shouldSwitchActiveEnd) {
 				this.activeEnd = 'end';
@@ -806,7 +817,7 @@ export default function dateRangePickerFormComponent({
 			this.setInitialCalendarMonths();
 			this.generateCalendars();
 
-			if (this.autoClose) {
+			if (this.autoApply && this.shouldCloseOnSelect) {
 				this.applySelectionAndClose();
 			}
 		},
