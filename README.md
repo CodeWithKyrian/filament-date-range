@@ -324,12 +324,13 @@ DateRangePicker::make('project_duration')
 ```
 ![An arrow icon shown between the "Start" and "End" inputs.](art/form-field-separator-icon.png)
 
-#### `autoClose(bool | Closure $condition = true)`
+#### `autoApply(bool | Closure $condition = true)`
 
-If `true` (default), the calendar popover will close immediately after a valid date range (both start and end dates) is selected. If `false`, "Apply" and "Cancel" buttons are shown in the popover, requiring an explicit click to confirm the selection and close. When `withTime()` is enabled, auto-close is disabled automatically so users can adjust times before applying.
+If `true` (default), the selection is applied immediately as dates are picked. The panel closes automatically after a valid range is set, **except when `withTime()` is enabled**—in that case the panel stays open so times can be adjusted.  
+If `false`, "Apply" and "Cancel" buttons are shown, and changes are only committed when you click Apply.
 ```php
 DateRangePicker::make('conference_dates')
-    ->autoClose(true)
+    ->autoApply(true)
 ```
 ![Calendar popover with "Apply" and "Cancel" buttons visible.](art/form-field-no-autoclose.png)
 
@@ -492,7 +493,7 @@ The `DateRangeFilter` mirrors many of the customization methods available on the
 -   `firstDayOfWeek(int | Closure $day)`
 -   `startPlaceholder(string | Closure | null $placeholder)`
 -   `endPlaceholder(string | Closure | null $placeholder)`
--   `autoClose(bool | Closure $condition = true)`: For filters, defaulting to `true` often provides a smoother UX, as the filter applies once the range is set and the popover closes.
+-   `autoApply(bool | Closure $condition = true)`: For filters, defaulting to `true` often provides a smoother UX, as the filter applies once the range is set and the popover closes (unless time is enabled).
 -   `dualCalendar(bool | Closure $condition = true)`
 -   `inline(bool | Closure $condition = true)`: Controls whether the start and end inputs are displayed horizontally (default) or vertically
 -   `stacked(bool | Closure $condition = true)`: Convenience method to set vertical layout, equivalent to `->inline(false)`

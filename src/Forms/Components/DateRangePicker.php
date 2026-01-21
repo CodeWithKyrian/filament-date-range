@@ -42,7 +42,7 @@ class DateRangePicker extends Field
 
     protected string|Closure|null $endPlaceholder = null;
 
-    protected bool|Closure $autoClose = true;
+    protected bool|Closure $autoApply = true;
 
     protected bool|Closure $dualCalendar = true;
 
@@ -205,9 +205,18 @@ class DateRangePicker extends Field
         return $this;
     }
 
+    /**
+     * @deprecated Use autoApply() instead.
+     */
     public function autoClose(bool|Closure $condition = true): static
     {
-        $this->autoClose = $condition;
+        return $this->autoApply($condition);
+    }
+
+    public function autoApply(bool|Closure $condition = true): static
+    {
+        $this->autoApply = $condition;
+
         return $this;
     }
 
@@ -517,9 +526,17 @@ class DateRangePicker extends Field
         return $this->evaluate($this->endPlaceholder) ?? __('filament-date-range::picker.placeholders.end_date', locale: $this->getLocale());
     }
 
+    /**
+     * @deprecated Use shouldAutoApply() instead.
+     */
     public function shouldAutoClose(): bool
     {
-        return $this->evaluate($this->autoClose);
+        return $this->shouldAutoApply();
+    }
+
+    public function shouldAutoApply(): bool
+    {
+        return $this->evaluate($this->autoApply);
     }
 
     public function shouldDisplayDualCalendar(): bool

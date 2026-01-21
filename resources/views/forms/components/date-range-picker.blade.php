@@ -43,7 +43,8 @@
             maxDate: @js($getMaxDate()),
             locale: @js($getLocale()),
             firstDayOfWeek: @js($getFirstDayOfWeek()),
-            autoClose: @js($shouldAutoClose() && !$timeEnabled),
+            autoApply: @js($shouldAutoApply()),
+            shouldCloseOnSelect: @js($shouldAutoApply() && !$timeEnabled),
             dualCalendar: @js($shouldDisplayDualCalendar()),
             isReadOnly: @js($isReadOnly()),
             isDisabled: @js($isDisabled()),
@@ -54,8 +55,8 @@
             allDayInference: @js($allDayInference),
             hasPresets: @js($showPresets),
             presets: @js($presets),
-        })" wire:ignore x-on:click.away="if(isOpen()) cancelSelectionAndClose()"
-        x-on:keydown.esc="if(isOpen()) cancelSelectionAndClose()"
+        })" wire:ignore x-on:click.away="if(isOpen()) handleDismiss()"
+        x-on:keydown.esc="if(isOpen()) handleDismiss()"
         {{ $attributes->merge($getExtraAlpineAttributes(), escape: false)->class(['fi-date-range-picker', 'fi-date-range-picker-rtl' => $isRtl]) }}>
 
         <div x-ref="inputContainer" class="fi-date-range-picker-input-container {{ $field->getStackedClasses() }}">
@@ -347,7 +348,7 @@
             </template>
 
             {{-- Apply/Cancel buttons --}}
-            <template x-if="!autoClose">
+            <template x-if="!autoApply">
                 <div class="fi-date-range-picker-footer">
                     {{-- Cancel Button --}}
                     <button type="button" x-on:click="cancelSelectionAndClose()"
