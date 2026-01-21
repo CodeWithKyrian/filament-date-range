@@ -287,20 +287,40 @@ DateRangePicker::make('travel_itenery')
 ```
 ![Inputs showing "Departure Date" and "Return Date".](art/form-field-placeholders.png)
 
-#### `separator(string | Htmlable | Closure $separator)`
+#### `separator(string | Htmlable | array | Closure $separator)`
 
-Customizes the text or HTML displayed between the "Start" and "End" input fields. Defaults to "to".
+Customizes the content displayed between the "Start" and "End" input fields. Defaults to "to".
+
+You can pass:
+- a `string` / `Htmlable` for a single separator across all layouts, or
+- an `array` with `stacked` and `inline` keys to render different separators depending on layout.
 ```php
 DateRangePicker::make('duration')
     ->separator('through')
+
+DateRangePicker::make('duration')
+    ->stacked(['default' => true, 'lg' => false])
+    ->separator([
+        'stacked' => '↓',
+        'inline' => '→',
+    ])
 ```
 
-#### `separatorIcon(string | Closure | null $icon)`
+#### `separatorIcon(string | array | Closure | null $icon)`
 
-A convenience method to use a Filament icon as the separator.
+A convenience method to use Filament icons as separators.
+
+You can pass a single icon, or an array with `stacked` and `inline` icons.
 ```php
 DateRangePicker::make('project_duration')
     ->separatorIcon('heroicon-o-arrow-long-right')
+
+DateRangePicker::make('project_duration')
+    ->stacked(['default' => true, 'lg' => false])
+    ->separatorIcon([
+        'stacked' => 'heroicon-o-arrow-down',
+        'inline' => 'heroicon-o-arrow-long-right',
+    ])
 ```
 ![An arrow icon shown between the "Start" and "End" inputs.](art/form-field-separator-icon.png)
 
@@ -349,21 +369,32 @@ DateRangePicker::make('date_range')
 ```
 ![Calendar popover showing only one month.](art/form-field-single-calendar.png)
 
-#### `inline(bool | Closure $condition = true)`
+#### `inline(bool | array | Closure $condition = true)`
 
 Controls whether the start and end inputs are displayed inline (horizontally) or stacked (vertically). Defaults to `true` (inline layout).
+
+For responsive behavior, pass a breakpoint map using Tailwind's breakpoints (`default`, `sm`, `md`, `lg`, `xl`, `2xl`).
 ```php
 DateRangePicker::make('event_period')
     ->inline() // Display inputs side by side (default)
+
+DateRangePicker::make('event_period')
+    ->inline(['default' => false, 'lg' => true]) // Stacked on mobile, inline from lg
 ```
+When a breakpoint is not specified, the default is used for that breakpoint.
 ![Date range picker with inputs displayed horizontally side by side.](art/form-field-inline.png)
 
-#### `stacked(bool | Closure $condition = true)`
+#### `stacked(bool | array | Closure $condition = true)`
 
 A convenience method to set the layout to stacked (vertical). Equivalent to `->inline(false)`.
+
+You can also pass a breakpoint map for responsive layouts.
 ```php
 DateRangePicker::make('event_period')
     ->stacked() // Display inputs vertically stacked
+
+DateRangePicker::make('event_period')
+    ->stacked(['default' => true, 'lg' => false]) // Stacked on mobile, inline from lg
 ```
 ![Date range picker with inputs displayed vertically stacked.](art/form-field-stacked.png)
 

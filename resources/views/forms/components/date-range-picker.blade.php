@@ -10,7 +10,6 @@
     $statePath = $getStatePath();
 
     $separator = $field->getSeparatorHtml();
-    $isInline = $isInline();
     $isSingleField = $isSingleField();
     $presets = $getPresets();
     $showPresets = !empty($presets);
@@ -59,11 +58,7 @@
         x-on:keydown.esc="if(isOpen()) cancelSelectionAndClose()"
         {{ $attributes->merge($getExtraAlpineAttributes(), escape: false)->class(['fi-date-range-picker', 'fi-date-range-picker-rtl' => $isRtl]) }}>
 
-        <div x-ref="inputContainer" @class([
-            'fi-date-range-picker-input-container',
-            'is-inline' => $isInline,
-            'is-stacked' => !$isInline,
-        ])>
+        <div x-ref="inputContainer" class="fi-date-range-picker-input-container {{ $field->getStackedClasses() }}">
             {{-- Single field --}}
             @if ($isSingleField)
                 <x-filament::input.wrapper :disabled="$isDisabled()" :inline-prefix="$isStartPrefixInline()" :inline-suffix="$isStartSuffixInline()" :prefix="$getStartPrefixLabel()"
@@ -107,12 +102,17 @@
                 </div>
 
                 {{-- Separator --}}
-                <div @class([
-                    'fi-date-range-picker-separator',
-                    'is-inline' => $isInline,
-                    'is-stacked' => !$isInline,
-                ])>
-                    {{ $separator }}
+                <div class="fi-date-range-picker-separator {{ $field->getStackedClasses() }}">
+                    @if (is_array($separator))
+                        <span class="fi-date-range-picker-separator-value is-stacked">
+                            {{ $separator['stacked'] ?? null }}
+                        </span>
+                        <span class="fi-date-range-picker-separator-value is-inline">
+                            {{ $separator['inline'] ?? null }}
+                        </span>
+                    @else
+                        {{ $separator }}
+                    @endif
                 </div>
 
                 {{-- End --}}

@@ -29,11 +29,69 @@
         @apply flex;
 
         &.is-inline {
-            @apply items-center gap-3;
+            @apply flex-row items-center gap-3;
         }
 
         &.is-stacked {
             @apply flex-col gap-2;
+        }
+
+        &.default\:stacked {
+            @apply flex-col gap-2;
+        }
+
+        &.default\:inline {
+            @apply flex-row items-center gap-3;
+        }
+
+        @media (min-width: 640px) {
+            &.sm\:stacked {
+                @apply flex-col gap-2;
+            }
+
+            &.sm\:inline {
+                @apply flex-row items-center gap-3;
+            }
+        }
+
+        @media (min-width: 768px) {
+            &.md\:stacked {
+                @apply flex-col gap-2;
+            }
+
+            &.md\:inline {
+                @apply flex-row items-center gap-3;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            &.lg\:stacked {
+                @apply flex-col gap-2;
+            }
+
+            &.lg\:inline {
+                @apply flex-row items-center gap-3;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            &.xl\:stacked {
+                @apply flex-col gap-2;
+            }
+
+            &.xl\:inline {
+                @apply flex-row items-center gap-3;
+            }
+        }
+
+        @media (min-width: 1536px) {
+            &.\32xl\:stacked {
+                @apply flex-col gap-2;
+            }
+
+            &.\32xl\:inline {
+                @apply flex-row items-center gap-3;
+            }
         }
 
         & .fi-fo-date-range-picker-single-wrapper {
@@ -58,6 +116,64 @@
 
         &.is-stacked .fi-date-range-picker-field {
             @apply w-full;
+        }
+
+        &.default\:stacked .fi-date-range-picker-field {
+            @apply w-full;
+        }
+
+        &.default\:inline .fi-date-range-picker-field {
+            @apply flex-1;
+        }
+
+        @media (min-width: 640px) {
+            &.sm\:stacked .fi-date-range-picker-field {
+                @apply w-full;
+            }
+
+            &.sm\:inline .fi-date-range-picker-field {
+                @apply flex-1;
+            }
+        }
+
+        @media (min-width: 768px) {
+            &.md\:stacked .fi-date-range-picker-field {
+                @apply w-full;
+            }
+
+            &.md\:inline .fi-date-range-picker-field {
+                @apply flex-1;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            &.lg\:stacked .fi-date-range-picker-field {
+                @apply w-full;
+            }
+
+            &.lg\:inline .fi-date-range-picker-field {
+                @apply flex-1;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            &.xl\:stacked .fi-date-range-picker-field {
+                @apply w-full;
+            }
+
+            &.xl\:inline .fi-date-range-picker-field {
+                @apply flex-1;
+            }
+        }
+
+        @media (min-width: 1536px) {
+            &.\32xl\:stacked .fi-date-range-picker-field {
+                @apply w-full;
+            }
+
+            &.\32xl\:inline .fi-date-range-picker-field {
+                @apply flex-1;
+            }
         }
 
         & .fi-date-range-picker-input-inner {
@@ -85,12 +201,186 @@
     & .fi-date-range-picker-separator {
         @apply inline-flex text-sm text-(--gray-500) dark:text-(--gray-400);
         
+        & .fi-date-range-picker-separator-value {
+            @apply hidden;
+        }
+
         &.is-inline {
             @apply shrink-0;
+
+            & .fi-date-range-picker-separator-value.is-inline {
+                @apply inline-flex;
+            }
+
+            & .fi-date-range-picker-separator-value.is-stacked {
+                @apply hidden;
+            }
         }
 
         &.is-stacked {
             @apply justify-center;
+
+            & .fi-date-range-picker-separator-value.is-stacked {
+                @apply inline-flex;
+            }
+
+            & .fi-date-range-picker-separator-value.is-inline {
+                @apply hidden;
+            }
+        }
+
+        &.default\:stacked {
+            @apply justify-center;
+
+            & .fi-date-range-picker-separator-value.is-stacked {
+                @apply inline-flex;
+            }
+
+            & .fi-date-range-picker-separator-value.is-inline {
+                @apply hidden;
+            }
+        }
+
+        &.default\:inline {
+            @apply shrink-0;
+
+            & .fi-date-range-picker-separator-value.is-inline {
+                @apply inline-flex;
+            }
+
+            & .fi-date-range-picker-separator-value.is-stacked {
+                @apply hidden;
+            }
+        }
+
+        @media (min-width: 640px) {
+            &.sm\:stacked {
+                @apply justify-center;
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply hidden;
+                }
+            }
+
+            &.sm\:inline {
+                @apply shrink-0;
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply hidden;
+                }
+            }
+        }
+
+        @media (min-width: 768px) {
+            &.md\:stacked {
+                @apply justify-center;
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply hidden;
+                }
+            }
+
+            &.md\:inline {
+                @apply shrink-0;
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply hidden;
+                }
+            }
+        }
+
+        @media (min-width: 1024px) {
+            &.lg\:stacked {
+                @apply justify-center;
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply hidden;
+                }
+            }
+
+            &.lg\:inline {
+                @apply shrink-0;
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply hidden;
+                }
+            }
+        }
+
+        @media (min-width: 1280px) {
+            &.xl\:stacked {
+                @apply justify-center;
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply hidden;
+                }
+            }
+
+            &.xl\:inline {
+                @apply shrink-0;
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply hidden;
+                }
+            }
+        }
+
+        @media (min-width: 1536px) {
+            &.\32xl\:stacked {
+                @apply justify-center;
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply hidden;
+                }
+            }
+
+            &.\32xl\:inline {
+                @apply shrink-0;
+
+                & .fi-date-range-picker-separator-value.is-inline {
+                    @apply inline-flex;
+                }
+
+                & .fi-date-range-picker-separator-value.is-stacked {
+                    @apply hidden;
+                }
+            }
         }
     }
 
