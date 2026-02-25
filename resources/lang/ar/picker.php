@@ -13,6 +13,7 @@ return [
         'from' => 'من',
         'until' => 'إلى',
     ],
+    'separator' => 'إلى',
     'presets' => [
         'heading' => 'الإعدادات المسبقة',
         'last_7_days' => 'آخر 7 أيام',

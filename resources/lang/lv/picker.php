@@ -9,6 +9,7 @@ return [
         'apply' => 'Piemērot',
         'cancel' => 'Atcelt',
     ],
+    'separator' => 'līdz',
     'presets' => [
         'heading' => 'Iepriekš iestatīti',
         'last_7_days' => 'Pēdējās 7 dienas',

@@ -13,6 +13,7 @@ return [
         'from' => 'Dari',
         'until' => 'Sampai',
     ],
+    'separator' => 'sampai',
     'presets' => [
         'heading' => 'Prasetel',
         'last_7_days' => '7 Hari Terakhir',

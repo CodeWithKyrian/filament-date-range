@@ -13,6 +13,7 @@ return [
         'from' => 'لە',
         'until' => 'تا',
     ],
+    'separator' => 'تا',
     'presets' => [
         'heading' => 'پێشتر دانراو',
         'last_7_days' => '٧ ڕۆژی پێشوو',

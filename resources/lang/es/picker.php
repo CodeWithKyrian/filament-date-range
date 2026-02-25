@@ -13,6 +13,7 @@ return [
         'from' => 'Desde',
         'until' => 'Hasta',
     ],
+    'separator' => 'hasta',
     'presets' => [
         'heading' => 'Preajustes',
         'last_7_days' => 'Últimos 7 días',

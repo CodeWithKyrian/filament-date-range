@@ -13,6 +13,7 @@ return [
         'from' => 'From',
         'until' => 'Until',
     ],
+    'separator' => 'to',
     'presets' => [
         'heading' => 'Presets',
         'last_7_days' => 'Last 7 Days',

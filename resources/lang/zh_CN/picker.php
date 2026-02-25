@@ -13,6 +13,7 @@ return [
         'from' => '从',
         'until' => '至',
     ],
+    'separator' => '至',
     'presets' => [
         'heading' => '预设',
         'last_7_days' => '最近7天',

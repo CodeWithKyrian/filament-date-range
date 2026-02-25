@@ -13,6 +13,7 @@ return [
         'from' => 'Від',
         'until' => 'До',
     ],
+    'separator' => 'до',
     'presets' => [
         'heading' => 'Передустановки',
         'last_7_days' => 'Останні 7 днів',

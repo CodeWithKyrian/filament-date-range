@@ -13,6 +13,7 @@ return [
         'from' => 'Từ',
         'until' => 'Đến',
     ],
+    'separator' => 'đến',
     'presets' => [
         'heading' => 'Cài đặt sẵn',
         'last_7_days' => '7 ngày qua',

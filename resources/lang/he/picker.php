@@ -13,6 +13,7 @@ return [
         'from' => 'מ',
         'until' => 'עד',
     ],
+    'separator' => 'עד',
     'presets' => [
         'heading' => 'הגדרות מראש',
         'last_7_days' => '7 הימים האחרונים',

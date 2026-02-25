@@ -13,6 +13,7 @@ return [
         'from' => 'از',
         'until' => 'تا',
     ],
+    'separator' => 'تا',
     'presets' => [
         'heading' => 'از پیش تنظیم شده',
         'last_7_days' => '۷ روز گذشته',

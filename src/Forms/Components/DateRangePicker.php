@@ -83,7 +83,7 @@ class DateRangePicker extends Field
 
         $this->stacked(false);
 
-        $this->separator('to');
+        $this->separator(fn (): string => __('filament-date-range::picker.separator', locale: $this->getLocale()));
     }
 
     public function getDefaultStateCasts(): array

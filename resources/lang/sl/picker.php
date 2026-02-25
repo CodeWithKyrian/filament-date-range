@@ -13,6 +13,7 @@ return [
         'from' => 'Od',
         'until' => 'Do',
     ],
+    'separator' => 'do',
     'presets' => [
         'heading' => 'Prednastavitve',
         'last_7_days' => 'Zadnjih 7 dni',
