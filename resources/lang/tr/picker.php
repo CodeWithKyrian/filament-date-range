@@ -13,6 +13,7 @@ return [
         'from' => 'Başlangıç',
         'until' => 'Bitiş',
     ],
+    'separator' => 'bitiş',
     'presets' => [
         'heading' => 'Önceden Ayarlanmış',
         'last_7_days' => 'Son 7 Gün',

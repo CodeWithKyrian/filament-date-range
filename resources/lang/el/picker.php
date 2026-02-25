@@ -13,6 +13,7 @@ return [
         'from' => 'Από',
         'until' => 'Έως',
     ],
+    'separator' => 'έως',
     'presets' => [
         'heading' => 'Προεπιλογές',
         'last_7_days' => 'Τελευταίες 7 ημέρες',

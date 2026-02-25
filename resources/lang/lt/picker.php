@@ -13,6 +13,7 @@ return [
         'from' => 'Nuo',
         'until' => 'Iki',
     ],
+    'separator' => 'iki',
     'presets' => [
         'heading' => 'Iš anksto nustatyti',
         'last_7_days' => 'Paskutinės 7 dienos',

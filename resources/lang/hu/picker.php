@@ -13,6 +13,7 @@ return [
         'from' => 'Ettől',
         'until' => 'Eddig',
     ],
+    'separator' => 'eddig',
     'presets' => [
         'heading' => 'Előre beállított',
         'last_7_days' => 'Utolsó 7 nap',

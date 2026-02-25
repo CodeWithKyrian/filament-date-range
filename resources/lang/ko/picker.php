@@ -13,6 +13,7 @@ return [
         'from' => '부터',
         'until' => '까지',
     ],
+    'separator' => '까지',
     'presets' => [
         'heading' => '사전 설정',
         'last_7_days' => '최근 7일',

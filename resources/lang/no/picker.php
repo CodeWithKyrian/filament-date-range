@@ -13,6 +13,7 @@ return [
         'from' => 'Fra',
         'until' => 'Til',
     ],
+    'separator' => 'til',
     'presets' => [
         'heading' => 'Forhåndsinnstillinger',
         'last_7_days' => 'Siste 7 dager',

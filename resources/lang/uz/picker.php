@@ -13,6 +13,7 @@ return [
         'from' => 'Dan',
         'until' => 'Gacha',
     ],
+    'separator' => 'gacha',
     'presets' => [
         'heading' => 'Oldindan sozlangan',
         'last_7_days' => 'Oxirgi 7 kun',

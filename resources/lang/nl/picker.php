@@ -13,6 +13,7 @@ return [
         'from' => 'Vanaf',
         'until' => 'Tot',
     ],
+    'separator' => 'tot',
     'presets' => [
         'heading' => 'Voorinstellingen',
         'last_7_days' => 'Laatste 7 dagen',
