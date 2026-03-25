@@ -213,7 +213,7 @@ DateRangePicker::make('période')
 
 #### `timezone(string | Closure | null $timezone)`
 
-Specifies the timezone to be used for interpreting and processing dates. Defaults to your application's timezone (`config('app.timezone')`).
+Specifies the timezone to be used for interpreting and processing dates. Defaults to Filament timezone.
 ```php
 DateRangePicker::make('appointment_time')
     ->timezone('America/New_York')
