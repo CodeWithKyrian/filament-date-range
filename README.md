@@ -270,6 +270,20 @@ DateRangePicker::make('maintenance_window')
 
 ![Time-enabled date range picker showing the all-day toggle.](art/form-field-time-range-toggle.png)
 
+#### Display behavior when "all day" is active
+
+When the "all day" toggle is on (either via user action or via `allDayInference`), the input display automatically omits the time portion of your `displayFormat` — so a format of `d.m.Y H:i` renders as `d.m.Y` while all-day is active. Time inputs in the popup remain populated, and the stored state still contains `00:00:00` / `23:59:59`.
+
+To opt out (keep the raw format regardless of all-day state):
+
+```php
+DateRangePicker::make('period')
+    ->withTime()
+    ->allDay()
+    ->displayFormat('d.m.Y H:i')
+    ->stripTimeInAllDayDisplay(false)
+```
+
 #### `startPlaceholder(string | Closure | null $placeholder)`
 
 Sets the placeholder text for the "Start" date input field. Defaults to a localized "Start Date".
