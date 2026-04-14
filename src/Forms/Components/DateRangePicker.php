@@ -60,6 +60,8 @@ class DateRangePicker extends Field
 
     protected bool|Closure $shouldInferAllDay = true;
 
+    protected bool|Closure $stripTimeInAllDayDisplay = true;
+
     /**
      * Presets configuration.
      *
@@ -262,6 +264,13 @@ class DateRangePicker extends Field
     {
         $this->allDayEnabled = $enabled;
         $this->shouldInferAllDay = $infer;
+
+        return $this;
+    }
+
+    public function stripTimeInAllDayDisplay(bool|Closure $condition = true): static
+    {
+        $this->stripTimeInAllDayDisplay = $condition;
 
         return $this;
     }
@@ -651,6 +660,11 @@ class DateRangePicker extends Field
     public function shouldInferAllDay(): bool
     {
         return $this->evaluate($this->shouldInferAllDay);
+    }
+
+    public function shouldStripTimeInAllDayDisplay(): bool
+    {
+        return (bool) $this->evaluate($this->stripTimeInAllDayDisplay);
     }
 
     public function getEnabledDates(): ?array
