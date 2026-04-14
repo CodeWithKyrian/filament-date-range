@@ -53,6 +53,7 @@
             timeEnabled: @js($timeEnabled),
             allDayEnabled: @js($allDayEnabled),
             allDayInference: @js($allDayInference),
+            stripTimeInAllDayDisplay: @js($shouldStripTimeInAllDayDisplay()),
             hasPresets: @js($showPresets),
             presets: @js($presets),
         })" wire:ignore x-on:click.away="if(isOpen()) handleDismiss()"

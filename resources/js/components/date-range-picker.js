@@ -35,6 +35,7 @@ export default function dateRangePickerFormComponent({
 	allDayInference = true,
 	hasPresets = false,
 	presets = [],
+	stripTimeInAllDayDisplay = true,
 }) {
 	const timezone = dayjs.tz.guess();
 
@@ -96,6 +97,7 @@ export default function dateRangePickerFormComponent({
 		hasPresets,
 		presets,
 		activePreset: null,
+		stripTimeInAllDayDisplay,
 
 		init() {
 			dayjs.locale(locales[locale] ?? locales['en'])
@@ -554,15 +556,15 @@ export default function dateRangePickerFormComponent({
 		},
 
 		updateDisplayValues() {
-			this.startDisplay = this.start
-				? this.start.format(this.displayFormat)
-				: "";
-			this.endDisplay = this.end
-				? this.end.format(this.displayFormat)
-				: "";
+			const effectiveFormat = (this.allDayEnabled && this.allDay && this.stripTimeInAllDayDisplay)
+				? this.stripTimeFromFormat(this.displayFormat)
+				: this.displayFormat;
 
-			const startFormatted = this.start ? this.start.format(this.displayFormat) : "";
-			const endFormatted = this.end ? this.end.format(this.displayFormat) : "";
+			this.startDisplay = this.start ? this.start.format(effectiveFormat) : "";
+			this.endDisplay = this.end ? this.end.format(effectiveFormat) : "";
+
+			const startFormatted = this.startDisplay;
+			const endFormatted = this.endDisplay;
 
 			if (this.start && this.end) {
 				this.rangeDisplay = `${startFormatted} — ${endFormatted}`;
@@ -577,6 +579,26 @@ export default function dateRangePickerFormComponent({
 			if (this.timeEnabled) {
 				this.syncTimeInputs();
 			}
+		},
+
+		stripTimeFromFormat(format) {
+			// Strip Day.js time tokens (H/HH, h/hh, m/mm, s/ss, A/a) plus common
+			// leading separators (space, comma, colon, "T").
+			// Literal-text brackets [like this] are preserved unchanged.
+			// After stripping, also remove any trailing separator-only brackets
+			// (e.g. "[T]" in ISO formats) that no longer have time tokens after them.
+			// Heuristic: a bracket with no lowercase letters is a pure separator
+			// (e.g. [T], [ ], [,]) — brackets with lowercase text (e.g. [um], [at])
+			// are localized words and must be kept.
+			return format
+				.replace(
+					/\[([^\]]*)\]|(\s*[,T]?\s*H{1,2}(?::m{1,2})?(?::s{1,2})?\s*[Aa]?)|(\s*[,T]?\s*h{1,2}(?::m{1,2})?(?::s{1,2})?\s*[Aa]?)/g,
+					(match, bracketed) => bracketed !== undefined ? `[${bracketed}]` : ''
+				)
+				.replace(/\s*\[[^a-z\]]*\]\s*$/, '')
+				.trim()
+				.replace(/[,\s]+$/, '')
+				.replace(/^[,\s]+/, '');
 		},
 
 		syncTimeInputs() {
