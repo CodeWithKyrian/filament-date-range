@@ -429,6 +429,17 @@ DateRangePicker::make('invoice_period')
 
 Makes the input fields read-only, preventing direct text input (selection via calendar is still possible).
 
+#### `editableInputs(bool | Closure $condition = true)`
+
+By default the input fields are read-only and can only be edited through the calendar popover. When enabled, users may also type dates directly into the inputs. On blur, the entered value is parsed against the `displayFormat` (or its all-day-stripped variant, when applicable). Invalid input silently reverts to the previous state; an empty input clears the corresponding date. In range mode, an end date earlier than the start is automatically swapped, and `minDate` / `maxDate` bounds are enforced.
+
+```php
+DateRangePicker::make('event_period')
+    ->editableInputs()
+```
+
+In `singleField()` mode, type the full range using the configured separator (for example `Jan 15, 2024 — Jan 20, 2024`).
+
 #### `disabled(bool | Closure $condition = true)`
 
 Disables the entire component, preventing any interaction.

@@ -62,6 +62,8 @@ class DateRangePicker extends Field
 
     protected bool|Closure $stripTimeInAllDayDisplay = true;
 
+    protected bool|Closure $editableInputs = false;
+
     /**
      * Presets configuration.
      *
@@ -271,6 +273,20 @@ class DateRangePicker extends Field
     public function stripTimeInAllDayDisplay(bool|Closure $condition = true): static
     {
         $this->stripTimeInAllDayDisplay = $condition;
+
+        return $this;
+    }
+
+    /**
+     * Allow users to type dates directly into the input fields.
+     *
+     * When enabled, the text inputs become writable. Typed values are parsed
+     * on blur using the configured display format (via Day.js strict parsing).
+     * Invalid input silently reverts to the previous state.
+     */
+    public function editableInputs(bool|Closure $condition = true): static
+    {
+        $this->editableInputs = $condition;
 
         return $this;
     }
@@ -665,6 +681,11 @@ class DateRangePicker extends Field
     public function shouldStripTimeInAllDayDisplay(): bool
     {
         return (bool) $this->evaluate($this->stripTimeInAllDayDisplay);
+    }
+
+    public function shouldAllowEditableInputs(): bool
+    {
+        return (bool) $this->evaluate($this->editableInputs);
     }
 
     public function getEnabledDates(): ?array

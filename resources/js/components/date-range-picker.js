@@ -36,6 +36,7 @@ export default function dateRangePickerFormComponent({
 	hasPresets = false,
 	presets = [],
 	stripTimeInAllDayDisplay = true,
+	editableInputs = false,
 }) {
 	const timezone = dayjs.tz.guess();
 
@@ -98,6 +99,7 @@ export default function dateRangePickerFormComponent({
 		presets,
 		activePreset: null,
 		stripTimeInAllDayDisplay,
+		editableInputs,
 
 		init() {
 			dayjs.locale(locales[locale] ?? locales['en'])
@@ -578,6 +580,115 @@ export default function dateRangePickerFormComponent({
 
 			if (this.timeEnabled) {
 				this.syncTimeInputs();
+			}
+		},
+
+		/**
+		 * Format currently used to render the inputs, matching updateDisplayValues().
+		 * Typed input must be parsed against the same format that the user sees.
+		 */
+		effectiveDisplayFormat() {
+			return (this.allDayEnabled && this.allDay && this.stripTimeInAllDayDisplay)
+				? this.stripTimeFromFormat(this.displayFormat)
+				: this.displayFormat;
+		},
+
+		/**
+		 * Parse a user-typed string using the currently displayed format.
+		 * Returns a Day.js instance or null when invalid / empty.
+		 */
+		parseInputValue(raw, { shouldEndOfDay = false } = {}) {
+			const trimmed = (raw ?? '').trim();
+			if (trimmed === '') return null;
+
+			const format = this.effectiveDisplayFormat();
+			let parsed = dayjs(trimmed, format, true);
+			if (!parsed.isValid()) return null;
+
+			if (this.timeEnabled) {
+				if (this.allDayEnabled && this.allDay) {
+					parsed = shouldEndOfDay ? parsed.endOf('day') : parsed.startOf('day');
+				} else if (!/[HhmsAa]/.test(format)) {
+					// Display format has no time tokens — fall back to start/end of day.
+					parsed = shouldEndOfDay ? parsed.endOf('day') : parsed.startOf('day');
+				}
+			}
+
+			return parsed;
+		},
+
+		/**
+		 * Blur handler for editable inputs. `target` is 'start', 'end' or 'range'
+		 * (the last one being the single-field representation showing both dates).
+		 * Invalid input silently reverts to the previous state.
+		 */
+		handleInputBlur(value, target) {
+			if (!this.editableInputs || this.isDisabled || this.isReadOnly) return;
+
+			if (target === 'range') {
+				this.handleRangeInputBlur(value);
+			} else {
+				this.handleSingleInputBlur(value, target);
+			}
+
+			this.updateDisplayValues();
+			this.updateState();
+			if (this.isOpen()) this.generateCalendarBasedOnActiveEnd();
+			if (this.hasPresets) this.checkIfMatchesPreset();
+		},
+
+		handleSingleInputBlur(value, target) {
+			if ((value ?? '').trim() === '') {
+				if (target === 'start') this.start = null;
+				else if (target === 'end') this.end = null;
+				return;
+			}
+
+			const parsed = this.parseInputValue(value, { shouldEndOfDay: target === 'end' });
+			if (!parsed) return; // Invalid parse — updateDisplayValues() will revert.
+
+			if (this.minDate && parsed.isBefore(this.minDate, 'day')) return;
+			if (this.maxDate && parsed.isAfter(this.maxDate, 'day')) return;
+
+			if (target === 'start') {
+				this.start = parsed;
+				if (this.end && this.start.isAfter(this.end, 'minute')) {
+					this.end = null;
+				}
+			} else if (target === 'end') {
+				this.end = parsed;
+				if (this.start && this.end.isBefore(this.start, 'minute')) {
+					this.start = null;
+				}
+			}
+		},
+
+		handleRangeInputBlur(value) {
+			const trimmed = (value ?? '').trim();
+			if (trimmed === '') {
+				this.start = null;
+				this.end = null;
+				return;
+			}
+
+			// Split on the display separator (" — "); fall back to a single date if no separator.
+			const parts = trimmed.split(/\s*—\s*/);
+			const startRaw = parts[0] ?? '';
+			const endRaw = parts[1] ?? '';
+
+			const parsedStart = this.parseInputValue(startRaw, { shouldEndOfDay: false });
+			const parsedEnd = endRaw !== '' ? this.parseInputValue(endRaw, { shouldEndOfDay: true }) : null;
+
+			if (!parsedStart && parts[0] !== '') return; // invalid → revert
+
+			this.start = parsedStart;
+			this.end = parsedEnd;
+
+			if (this.start && this.end && this.start.isAfter(this.end, 'minute')) {
+				// Swap to keep a valid range.
+				const tmp = this.start;
+				this.start = this.end.startOf('day');
+				this.end = tmp.endOf('day');
 			}
 		},
 
