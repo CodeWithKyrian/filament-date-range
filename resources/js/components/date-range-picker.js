@@ -101,12 +101,35 @@ export default function dateRangePickerFormComponent({
 		stripTimeInAllDayDisplay,
 		editableInputs,
 
+		// Cached YYYY-MM-DD strings derived from the dayjs values above. The
+		// per-cell :class bindings compare these instead of constructing fresh
+		// dayjs+tz objects on every reactive read — the dominant render cost
+		// before the cache existed.
+		startKey: null,
+		endKey: null,
+		hoveredStartKey: null,
+		hoveredEndKey: null,
+		todayKey: null,
+		minKey: null,
+		maxKey: null,
+		// { 'YYYY-MM-DD': true } | null — O(1) membership for enabledDates.
+		enabledKeysObj: null,
+
 		init() {
 			dayjs.locale(locales[locale] ?? locales['en'])
 
 			this.monthNames = dayjs.months();
 			const wdShort = dayjs.weekdaysShort();
 			this.dayNames = wdShort.slice(this.firstDayOfWeek).concat(wdShort.slice(0, this.firstDayOfWeek));
+
+			this.todayKey = dayjs().tz(timezone).format('YYYY-MM-DD');
+			this.minKey = this.minDate ? this.minDate.format('YYYY-MM-DD') : null;
+			this.maxKey = this.maxDate ? this.maxDate.format('YYYY-MM-DD') : null;
+			if (this.enabledDates && Array.isArray(this.enabledDates)) {
+				const obj = {};
+				for (let i = 0; i < this.enabledDates.length; i++) obj[this.enabledDates[i]] = true;
+				this.enabledKeysObj = obj;
+			}
 
 			const [start, end] = this.getDatesFromState();
 			this.start = start;
@@ -230,8 +253,7 @@ export default function dateRangePickerFormComponent({
 			}
 
 			this.isAwaitingEndDate = (this.activeEnd === 'start' && !this.end) || (this.activeEnd === 'end' && !this.start);
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 			if (this.hasPresets) {
 				this.activePreset = null;
 			}
@@ -283,7 +305,7 @@ export default function dateRangePickerFormComponent({
 				return;
 			}
 
-			const firstDayOfMonth = dayjs(new Date(year, month, 1)).tz(timezone);
+			const firstDayOfMonth = dayjs(new Date(year, month, 1));
 			const daysInCurrentMonth = firstDayOfMonth.daysInMonth();
 
 			this[`daysInMonth${calendarNum}`] = Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1);
@@ -326,14 +348,12 @@ export default function dateRangePickerFormComponent({
 		applySelectionAndClose() {
 			this.originalStart = null;
 			this.originalEnd = null;
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 			this.$refs.panel.toggle(this.$refs.inputContainer);
 		},
 
 		cancelSelectionAndClose() {
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 
 			if (!this.autoApply) {
 				this.revertToOriginalDates();
@@ -371,24 +391,22 @@ export default function dateRangePickerFormComponent({
 			else if (this.start) viewDate = this.start;
 			else if (this.end) viewDate = this.end;
 
-			this.currentCalendarMonth = viewDate.month();
-			this.currentCalendarYear = viewDate.year();
-			this.generateCalendarDays();
-		},
+			this.currentCalendarMonth1 = viewDate.month();
+			this.currentCalendarYear1 = viewDate.year();
 
-		generateCalendarDays() {
-			const firstDayOfMonth = dayjs(new Date(this.currentCalendarYear, this.currentCalendarMonth, 1)).tz(timezone);
-			const daysInMonthVal = firstDayOfMonth.daysInMonth();
-			const dayOffset = (firstDayOfMonth.day() - this.firstDayOfWeek + 7) % 7;
+			if (this.dualCalendar) {
+				const second = viewDate.add(1, 'month');
+				this.currentCalendarMonth2 = second.month();
+				this.currentCalendarYear2 = second.year();
+			}
 
-			this.blankDays = Array.from({ length: dayOffset }, (_, i) => i + 1);
-			this.daysInMonth = Array.from({ length: daysInMonthVal }, (_, i) => i + 1);
+			this.generateCalendars();
 		},
 
 		previousMonth() {
 			if (this.isPreviousMonthDisabled()) return; // This will need to check based on month1
 
-			const cal1Date = dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1)).tz(timezone);
+			const cal1Date = dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1));
 			const newCal1Date = cal1Date.subtract(1, 'month');
 			this.currentCalendarMonth1 = newCal1Date.month();
 			this.currentCalendarYear1 = newCal1Date.year();
@@ -406,8 +424,8 @@ export default function dateRangePickerFormComponent({
 			if (this.isNextMonthDisabled()) return;
 
 			const newCal1Date = this.dualCalendar ?
-				dayjs(new Date(this.currentCalendarYear2, this.currentCalendarMonth2, 1)).tz(timezone) :
-				dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1)).tz(timezone).add(1, 'month');
+				dayjs(new Date(this.currentCalendarYear2, this.currentCalendarMonth2, 1)) :
+				dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1)).add(1, 'month');
 
 			this.currentCalendarMonth1 = newCal1Date.month();
 			this.currentCalendarYear1 = newCal1Date.year();
@@ -423,7 +441,7 @@ export default function dateRangePickerFormComponent({
 
 		isPreviousMonthDisabled() {
 			if (!this.minDate) return false;
-			const prevMonthOfCal1 = dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1)).tz(timezone).subtract(1, 'month');
+			const prevMonthOfCal1 = dayjs(new Date(this.currentCalendarYear1, this.currentCalendarMonth1, 1)).subtract(1, 'month');
 			return prevMonthOfCal1.endOf('month').isBefore(this.minDate.startOf('month'));
 		},
 
@@ -432,7 +450,7 @@ export default function dateRangePickerFormComponent({
 			const monthToCompare = this.dualCalendar ? this.currentCalendarMonth2 : this.currentCalendarMonth1;
 			const yearToCompare = this.dualCalendar ? this.currentCalendarYear2 : this.currentCalendarYear1;
 
-			const nextMonthToDisplay = dayjs(new Date(yearToCompare, monthToCompare, 1)).tz(timezone).add(1, 'month');
+			const nextMonthToDisplay = dayjs(new Date(yearToCompare, monthToCompare, 1)).add(1, 'month');
 			return nextMonthToDisplay.startOf('month').isAfter(this.maxDate.endOf('month'));
 		},
 
@@ -440,8 +458,7 @@ export default function dateRangePickerFormComponent({
 			const selectedDate = dayjs(new Date(year, month, day)).tz(timezone);
 			if (this.isDayDisabledInternal(selectedDate)) return;
 
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 
 			let rangeCompleted = false;
 			let shouldSwitchActiveEnd = false;
@@ -524,37 +541,34 @@ export default function dateRangePickerFormComponent({
 		},
 
 		previewDay(day, month, year) {
-			const hoverDate = dayjs(new Date(year, month, day)).tz(timezone);
-			if (this.isDayDisabledInternal(hoverDate)) {
-				this.hoveredStartDate = null;
-				this.hoveredEndDate = null;
+			const candidateKey = this._cellKey(year, month, day);
+			if (this._isKeyDisabled(candidateKey)) {
+				this._clearHover();
 				return;
 			}
 
 			if (this.activeEnd === 'start') {
-				this.hoveredStartDate = hoverDate;
-				this.hoveredEndDate = null;
-			} else if (this.activeEnd === 'end' && this.start) {
-				if (hoverDate.isBefore(this.start, 'day')) {
-					this.hoveredEndDate = null;
+				this._setHover('start', dayjs(new Date(year, month, day)));
+				this._setHover('end', null);
+			} else if (this.activeEnd === 'end' && this.startKey) {
+				this._setHover('start', null);
+				if (candidateKey < this.startKey) {
+					this._setHover('end', null);
 				} else {
-					// Only show hover if the range would be continuous
+					const hoverDate = dayjs(new Date(year, month, day));
 					if (this.isRangeContinuous(this.start, hoverDate)) {
-						this.hoveredEndDate = hoverDate;
+						this._setHover('end', hoverDate);
 					} else {
-						this.hoveredEndDate = null;
+						this._setHover('end', null);
 					}
 				}
-				this.hoveredStartDate = null; // Clear other preview
 			} else {
-				this.hoveredStartDate = null;
-				this.hoveredEndDate = null;
+				this._clearHover();
 			}
 		},
 
 		clearPreview() {
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 		},
 
 		updateDisplayValues() {
@@ -578,9 +592,37 @@ export default function dateRangePickerFormComponent({
 				this.rangeDisplay = "";
 			}
 
+			this.startKey = this.start ? this.start.format('YYYY-MM-DD') : null;
+			this.endKey = this.end ? this.end.format('YYYY-MM-DD') : null;
+
 			if (this.timeEnabled) {
 				this.syncTimeInputs();
 			}
+		},
+
+		_cellKey(year, month, day) {
+			const m = month + 1;
+			return year
+				+ '-' + (m < 10 ? '0' + m : '' + m)
+				+ '-' + (day < 10 ? '0' + day : '' + day);
+		},
+
+		_setHover(target, dayjsValue) {
+			const key = dayjsValue ? dayjsValue.format('YYYY-MM-DD') : null;
+			if (target === 'start') {
+				this.hoveredStartDate = dayjsValue;
+				this.hoveredStartKey = key;
+			} else {
+				this.hoveredEndDate = dayjsValue;
+				this.hoveredEndKey = key;
+			}
+		},
+
+		_clearHover() {
+			this.hoveredStartDate = null;
+			this.hoveredEndDate = null;
+			this.hoveredStartKey = null;
+			this.hoveredEndKey = null;
 		},
 
 		/**
@@ -799,8 +841,7 @@ export default function dateRangePickerFormComponent({
 		clearAllDates() {
 			this.start = null;
 			this.end = null;
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 			if (this.timeEnabled) {
 				this.allDay = this.allDayEnabled && this.allDayInference;
 				this.startTime = '00:00';
@@ -941,8 +982,7 @@ export default function dateRangePickerFormComponent({
 				this.applyAllDayTimes();
 			}
 			this.activePreset = presetKey;
-			this.hoveredStartDate = null;
-			this.hoveredEndDate = null;
+			this._clearHover();
 
 			this.updateDisplayValues();
 			this.updateState();
@@ -969,58 +1009,58 @@ export default function dateRangePickerFormComponent({
 			if (this.isOpen()) this.generateCalendarBasedOnActiveEnd();
 		},
 
-		isDayDisabledInternal(dateAsDayjs) {
-			if (this.minDate && dateAsDayjs.isBefore(this.minDate, "day")) return true;
-			if (this.maxDate && dateAsDayjs.isAfter(this.maxDate, "day")) return true;
-			
-			// If enabledDates is provided, only those dates are allowed
-			if (this.enabledDates && Array.isArray(this.enabledDates)) {
-				const dateString = dateAsDayjs.format('YYYY-MM-DD');
-				return !this.enabledDates.includes(dateString);
-			}
-			
+		// String-key membership lookup. Used by both the per-cell predicates
+		// (which already pass a key) and isDayDisabledInternal (which has a
+		// dayjs and derives the key once).
+		_isKeyDisabled(k) {
+			if (this.minKey && k < this.minKey) return true;
+			if (this.maxKey && k > this.maxKey) return true;
+			if (this.enabledKeysObj && !this.enabledKeysObj[k]) return true;
 			return false;
 		},
 
+		isDayDisabledInternal(dateAsDayjs) {
+			return this._isKeyDisabled(dateAsDayjs.format('YYYY-MM-DD'));
+		},
+
 		isRangeContinuous(startDate, endDate) {
-			if (!this.enabledDates || !Array.isArray(this.enabledDates)) return true;
+			if (!this.enabledKeysObj) return true;
 			if (!startDate || !endDate) return true;
-			
+
 			const start = startDate.isBefore(endDate) ? startDate : endDate;
 			const end = startDate.isBefore(endDate) ? endDate : startDate;
-			
+
 			let current = start.clone();
 			while (current.isSameOrBefore(end, 'day')) {
-				const dateString = current.format('YYYY-MM-DD');
-				if (!this.enabledDates.includes(dateString)) {
+				if (!this.enabledKeysObj[current.format('YYYY-MM-DD')]) {
 					return false;
 				}
 				current = current.add(1, 'day');
 			}
-			
+
 			return true;
 		},
 
 		isDayDisabled(day, month, year) {
-			return this.isDayDisabledInternal(dayjs(new Date(year, month, day)).tz(timezone));
+			return this._isKeyDisabled(this._cellKey(year, month, day));
 		},
 
 		isToday(day, month, year) {
-			return dayjs(new Date(year, month, day))
-				.tz(timezone)
-				.isSame(dayjs().tz(timezone), "day");
+			return this._cellKey(year, month, day) === this.todayKey;
 		},
 
 		isStartDay(day, month, year) {
-			const dateToCompare = this.activeEnd === 'start' && this.hoveredStartDate ? this.hoveredStartDate : this.start;
-			if (!dateToCompare) return false;
-			return dayjs(new Date(year, month, day)).tz(timezone).isSame(dateToCompare, "day");
+			const targetKey = (this.activeEnd === 'start' && this.hoveredStartKey)
+				? this.hoveredStartKey
+				: this.startKey;
+			return targetKey !== null && this._cellKey(year, month, day) === targetKey;
 		},
 
 		isEndDay(day, month, year) {
-			const dateToCompare = this.activeEnd === 'end' && this.hoveredEndDate ? this.hoveredEndDate : this.end;
-			if (!dateToCompare) return false;
-			return dayjs(new Date(year, month, day)).tz(timezone).isSame(dateToCompare, "day");
+			const targetKey = (this.activeEnd === 'end' && this.hoveredEndKey)
+				? this.hoveredEndKey
+				: this.endKey;
+			return targetKey !== null && this._cellKey(year, month, day) === targetKey;
 		},
 
 		isDaySelected(day, month, year) {
@@ -1028,27 +1068,27 @@ export default function dateRangePickerFormComponent({
 		},
 
 		isInRange(day, month, year) {
-			const currentActiveStart = this.activeEnd === 'start' && this.hoveredStartDate ? this.hoveredStartDate : this.start;
-			const currentActiveEnd = this.activeEnd === 'end' && this.hoveredEndDate ? this.hoveredEndDate : this.end;
+			const sKey = (this.activeEnd === 'start' && this.hoveredStartKey)
+				? this.hoveredStartKey
+				: this.startKey;
+			const eKey = (this.activeEnd === 'end' && this.hoveredEndKey)
+				? this.hoveredEndKey
+				: this.endKey;
 
-			const s = currentActiveStart || this.start;
-			const e = currentActiveEnd || this.end;
+			if (!sKey || !eKey || sKey === eKey) return false;
 
-			if (!s || !e || s.isSame(e, "day")) return false;
+			const lo = sKey < eKey ? sKey : eKey;
+			const hi = sKey < eKey ? eKey : sKey;
+			const k = this._cellKey(year, month, day);
 
-			const d = dayjs(new Date(year, month, day)).tz(timezone);
-
-			const startRange = s.isBefore(e) ? s : e;
-			const endRange = s.isBefore(e) ? e : s;
-
-			return d.isAfter(startRange, "day") && d.isBefore(endRange, "day");
+			return k > lo && k < hi;
 		},
 
 		hasRange() {
-			return !!(this.start && (
-				(this.end && !this.start.isSame(this.end, 'day')) ||
-				(this.hoveredEndDate && !this.start.isSame(this.hoveredEndDate, 'day'))
-			));
+			if (!this.startKey) return false;
+			if (this.endKey && this.startKey !== this.endKey) return true;
+			if (this.hoveredEndKey && this.startKey !== this.hoveredEndKey) return true;
+			return false;
 		},
 
 		isOpen() {
