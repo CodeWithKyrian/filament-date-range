@@ -25,11 +25,11 @@ It has a remarkably small footprint (JS ~105KB, gzipped ~26.2KB), ensuring your 
 
 ## Version Compatibility
 
-| Filament | Filament DateRange |
-| :--- | :--- |
-| 3.x | 1.x |
-| 4.x | 2.x |
-| 5.x | 2.1+ |
+| Filament | Laravel | PHP | Filament DateRange |
+| :--- | :--- | :--- | :--- |
+| 3.x | 10 / 11 | 8.1+ | 1.x |
+| 4.x | 11 / 12 / 13 | 8.2+ | 2.0 – 2.2 |
+| 4.x / 5.x | 11 / 12 / 13 | 8.3+ | 2.3+ |
 
 ## Installation
 
