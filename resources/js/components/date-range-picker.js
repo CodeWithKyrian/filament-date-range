@@ -636,6 +636,25 @@ export default function dateRangePickerFormComponent({
 		},
 
 		/**
+		 * Day.js strict parsing rejects "15.4.26" against "DD.MM.YYYY"; widen
+		 * the format with short day/month/2-digit-year variants so common
+		 * abbreviations still parse on blur. Lookarounds keep MMM/MMMM and
+		 * DDD/DDDD tokens intact.
+		 */
+		buildCandidateFormats(format) {
+			const swaps = [
+				[/(?<!D)DD(?!D)/g, 'D'],
+				[/(?<!M)MM(?!M)/g, 'M'],
+				[/(?<!Y)YYYY(?!Y)/g, 'YY'],
+			];
+			const candidates = swaps.reduce(
+				(acc, [pattern, replacement]) => acc.flatMap((f) => [f, f.replace(pattern, replacement)]),
+				[format]
+			);
+			return [...new Set(candidates)];
+		},
+
+		/**
 		 * Parse a user-typed string using the currently displayed format.
 		 * Returns a Day.js instance or null when invalid / empty.
 		 */
@@ -644,7 +663,7 @@ export default function dateRangePickerFormComponent({
 			if (trimmed === '') return null;
 
 			const format = this.effectiveDisplayFormat();
-			let parsed = dayjs(trimmed, format, true);
+			let parsed = dayjs(trimmed, this.buildCandidateFormats(format), true);
 			if (!parsed.isValid()) return null;
 
 			if (this.timeEnabled) {

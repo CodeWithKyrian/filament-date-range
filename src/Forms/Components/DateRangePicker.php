@@ -281,8 +281,9 @@ class DateRangePicker extends Field
      * Allow users to type dates directly into the input fields.
      *
      * When enabled, the text inputs become writable. Typed values are parsed
-     * on blur using the configured display format (via Day.js strict parsing).
-     * Invalid input silently reverts to the previous state.
+     * on blur against the configured display format, with short day / month /
+     * 2-digit year variants also accepted (so a "DD.MM.YYYY" field still
+     * parses "15.4.26"). Invalid input silently reverts to the previous state.
      */
     public function editableInputs(bool|Closure $condition = true): static
     {
