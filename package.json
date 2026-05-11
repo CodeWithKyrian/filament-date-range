@@ -16,13 +16,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.20"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "esbuild": "^0.25.5",
-    "postcss": "^8.5.3",
+    "@tailwindcss/cli": "^4.2.4",
+    "autoprefixer": "^10.5.0",
+    "esbuild": "^0.28.0",
+    "postcss": "^8.5.13",
     "postcss-prune-var": "^1.1.2",
-    "tailwindcss": "^4.1.13"
+    "tailwindcss": "^4.2.4"
   }
 }

@@ -53,6 +53,8 @@
             timeEnabled: @js($timeEnabled),
             allDayEnabled: @js($allDayEnabled),
             allDayInference: @js($allDayInference),
+            stripTimeInAllDayDisplay: @js($shouldStripTimeInAllDayDisplay()),
+            editableInputs: @js($shouldAllowEditableInputs()),
             hasPresets: @js($showPresets),
             presets: @js($presets),
         })" wire:ignore x-on:click.away="if(isOpen()) handleDismiss()"
@@ -67,8 +69,10 @@
                     :suffix-icon="$getStartSuffixIcon()" :suffix-icon-color="$getStartSuffixIconColor()" :valid="!$errors->has($statePath . '.start') && !$errors->has($statePath . '.end')"
                     class="fi-fo-date-range-picker-single-wrapper">
                     <div class="fi-date-range-picker-input-inner">
-                        <input x-ref="singleInput" id="{{ $id }}" type="text" readonly x-model="rangeDisplay"
-                            x-on:click="!isDisabled && !isReadOnly && openCalendar('start')"
+                        <input x-ref="singleInput" id="{{ $id }}" type="text" x-model="rangeDisplay"
+                            x-bind:readonly="!editableInputs"
+                            x-on:click="!isDisabled && !isReadOnly && !isOpen() && openCalendar('start')"
+                            x-on:blur="editableInputs && handleInputBlur($event.target.value, 'range')"
                             placeholder="{{ $getStartPlaceholder() }}" wire:key="{{ $livewireKey }}.range-display"
                             :disabled="isDisabled || isReadOnly" class="fi-date-range-picker-input"
                             :class="{ 'is-active': isOpen() }" />
@@ -87,8 +91,11 @@
                         :suffix-actions="$getStartSuffixActions()" :suffix-icon="$getStartSuffixIcon()" :suffix-icon-color="$getStartSuffixIconColor()" :valid="!$errors->has($statePath . '.start')"
                         class="fi-fo-date-range-picker-start-wrapper">
                         <div class="fi-date-range-picker-input-inner">
-                            <input x-ref="startInput" id="{{ $startId }}" type="text" readonly
-                                x-model="startDisplay" x-on:click="!isDisabled && !isReadOnly && openCalendar('start')"
+                            <input x-ref="startInput" id="{{ $startId }}" type="text"
+                                x-bind:readonly="!editableInputs"
+                                x-model="startDisplay"
+                                x-on:click="!isDisabled && !isReadOnly && !isOpen() && openCalendar('start')"
+                                x-on:blur="editableInputs && handleInputBlur($event.target.value, 'start')"
                                 placeholder="{{ $getStartPlaceholder() }}" wire:key="{{ $livewireKey }}.start-display"
                                 :disabled="isDisabled || isReadOnly" class="fi-date-range-picker-input"
                                 :class="{ 'is-active': isOpen() && activeEnd === 'start' }" />
@@ -123,8 +130,11 @@
                         :suffix-actions="$getEndSuffixActions()" :suffix-icon="$getEndSuffixIcon()" :suffix-icon-color="$getEndSuffixIconColor()" :valid="!$errors->has($statePath . '.end')"
                         class="fi-fo-date-range-picker-end-wrapper">
                         <div class="fi-date-range-picker-input-inner">
-                            <input x-ref="endInput" id="{{ $endId }}" type="text" readonly
-                                x-model="endDisplay" x-on:click="!isDisabled && !isReadOnly && openCalendar('end')"
+                            <input x-ref="endInput" id="{{ $endId }}" type="text"
+                                x-bind:readonly="!editableInputs"
+                                x-model="endDisplay"
+                                x-on:click="!isDisabled && !isReadOnly && !isOpen() && openCalendar('end')"
+                                x-on:blur="editableInputs && handleInputBlur($event.target.value, 'end')"
                                 placeholder="{{ $getEndPlaceholder() }}" wire:key="{{ $livewireKey }}.end-display"
                                 :disabled="isDisabled || isReadOnly" class="fi-date-range-picker-input"
                                 :class="{ 'is-active': isOpen() && activeEnd === 'end' }" />
