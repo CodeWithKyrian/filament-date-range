@@ -270,6 +270,20 @@ DateRangePicker::make('maintenance_window')
 
 ![Time-enabled date range picker showing the all-day toggle.](art/form-field-time-range-toggle.png)
 
+#### Display behavior when "all day" is active
+
+When the "all day" toggle is on (either via user action or via `allDayInference`), the input display automatically omits the time portion of your `displayFormat` — so a format of `d.m.Y H:i` renders as `d.m.Y` while all-day is active. Time inputs in the popup remain populated, and the stored state still contains `00:00:00` / `23:59:59`.
+
+To opt out (keep the raw format regardless of all-day state):
+
+```php
+DateRangePicker::make('period')
+    ->withTime()
+    ->allDay()
+    ->displayFormat('d.m.Y H:i')
+    ->stripTimeInAllDayDisplay(false)
+```
+
 #### `startPlaceholder(string | Closure | null $placeholder)`
 
 Sets the placeholder text for the "Start" date input field. Defaults to a localized "Start Date".
@@ -414,6 +428,17 @@ DateRangePicker::make('invoice_period')
 #### `readOnly(bool | Closure $condition = true)`
 
 Makes the input fields read-only, preventing direct text input (selection via calendar is still possible).
+
+#### `editableInputs(bool | Closure $condition = true)`
+
+By default the input fields are read-only and can only be edited through the calendar popover. When enabled, users may also type dates directly into the inputs. On blur, the entered value is parsed against the `displayFormat` (or its all-day-stripped variant, when applicable). Invalid input silently reverts to the previous state; an empty input clears the corresponding date. In range mode, an end date earlier than the start is automatically swapped, and `minDate` / `maxDate` bounds are enforced.
+
+```php
+DateRangePicker::make('event_period')
+    ->editableInputs()
+```
+
+In `singleField()` mode, type the full range using the configured separator (for example `Jan 15, 2024 — Jan 20, 2024`).
 
 #### `disabled(bool | Closure $condition = true)`
 
