@@ -28,6 +28,12 @@ class DateRangeServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        // Filament's asset registration helpers may not be present in all
+        // Filament versions; only register assets when the facade exists.
+        if (! class_exists(\Filament\Support\Facades\FilamentAsset::class)) {
+            return;
+        }
+
         FilamentAsset::register([
             AlpineComponent::make('date-range-picker', __DIR__ . '/../dist/components/date-range-picker.js'),
             Css::make('date-range-picker-styles', __DIR__ . '/../dist/css/date-range-picker.css'),

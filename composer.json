@@ -1,6 +1,6 @@
 {
 	"name": "codewithkyrian/filament-date-range",
-	"description": "A date range field and filter for Filament v3.",
+	"description": "A date range field and filter for Filament (v4 & v5).",
 	"type": "library",
 	"license": "MIT",
 	"authors": [

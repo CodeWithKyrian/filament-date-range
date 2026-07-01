@@ -34,7 +34,7 @@
 
 <x-dynamic-component :component="$fieldWrapperView" :field="$field" :inline-label-vertical-alignment="\Filament\Support\Enums\VerticalAlignment::Center">
     <div x-load
-        x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('date-range-picker', 'codewithkyrian/filament-date-range') }}"
+        x-load-src="{{ class_exists(\Filament\Support\Facades\FilamentAsset::class) ? \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('date-range-picker', 'codewithkyrian/filament-date-range') : asset('vendor/codewithkyrian/filament-date-range/dist/components/date-range-picker.js') }}"
         x-data="dateRangePickerFormComponent({
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')") }},
             displayFormat: @js(convert_date_format($getDisplayFormat())->to('day.js')),

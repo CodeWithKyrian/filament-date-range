@@ -10,7 +10,6 @@ use CodeWithKyrian\FilamentDateRange\Forms\Components\StateCasts\DateRangeStateC
 use Filament\Forms\Components\Concerns\CanBeReadOnly;
 use Filament\Forms\Components\Field;
 use Filament\Support\Concerns\HasExtraAlpineAttributes;
-use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
@@ -366,7 +365,24 @@ class DateRangePicker extends Field
 
     public function getTimezone(): string
     {
-        return $this->evaluate($this->timezone) ?? FilamentTimezone::get();
+        $evaluated = $this->evaluate($this->timezone);
+
+        if (! empty($evaluated)) {
+            return $evaluated;
+        }
+
+        // Prefer Filament's timezone facade when available (v4), but
+        // gracefully fall back to app timezone when it's not present
+        // (ensures compatibility with different Filament versions).
+        if (class_exists(\Filament\Support\Facades\FilamentTimezone::class)) {
+            try {
+                return \Filament\Support\Facades\FilamentTimezone::get();
+            } catch (\Throwable $e) {
+                // ignore and fall back
+            }
+        }
+
+        return config('app.timezone') ?? date_default_timezone_get();
     }
 
     public function getLocale(): string
